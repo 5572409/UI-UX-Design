@@ -1,0 +1,483 @@
+html::
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon 3D Shooter - Pro Edition</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="game-container">
+        <div class="game-header">
+            <div class="stats">
+                <div id="score">SCORE: 0</div>
+                <div id="lives">LIVES: ❤️❤️❤️</div>
+            </div>
+            <button id="pauseBtn" class="header-btn hidden">PAUSE</button>
+        </div>
+
+        <div class="game-area">
+            <canvas id="gameCanvas"></canvas>
+
+            <div id="startScreen" class="overlay">
+                <h1 class="neon-text-blue">NEON RUSH</h1>
+                <button id="startBtn" class="btn start-btn">START GAME</button>
+            </div>
+
+            <div id="pauseScreen" class="overlay hidden">
+                <h1 class="neon-text-blue">PAUSED</h1>
+                <button id="resumeBtn" class="btn resume-btn">RESUME</button>
+            </div>
+
+            <div id="gameOverScreen" class="overlay hidden">
+                <h1 class="neon-text-red">GAME OVER</h1>
+                <button id="restartBtn" class="btn restart-btn">PLAY AGAIN</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+CSS;::
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    background-color: #05050c;
+    font-family: 'Courier New', Courier, monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    color: #fff;
+}
+
+/* Kept the exact same mini compact size */
+.game-container {
+    width: 100%;
+    max-width: 320px;
+    height: 80vh;
+    max-height: 520px;
+    background: radial-gradient(circle, #0f0f26 0%, #050510 100%);
+    border: 3px solid #00f0ff;
+    box-shadow: 0 0 15px #00f0ff, inset 0 0 10px #00f0ff;
+    border-radius: 10px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    cursor: crosshair;
+}
+
+/* Professional Header Layout */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.5);
+    border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+    z-index: 5;
+}
+
+.stats {
+    font-weight: bold;
+    font-size: 0.85rem;
+    text-shadow: 0 0 5px #00f0ff;
+    line-height: 1.4;
+}
+
+/* Small Sleek Header Button */
+.header-btn {
+    background: transparent;
+    border: 1px solid #00f0ff;
+    color: #00f0ff;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    font-family: inherit;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 0 5px #00f0ff;
+    transition: all 0.2s ease;
+}
+
+.header-btn:hover {
+    background: rgba(0, 240, 255, 0.2);
+}
+
+/* 3D Perspective Area */
+.game-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    perspective: 200px;
+}
+
+#gameCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: transparent;
+    transform: rotateX(10deg);
+}
+
+/* Centered Overlays for Screens */
+.overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(5, 5, 15, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Main UI Buttons */
+.btn {
+    background: transparent;
+    border: 2px solid #ff007f;
+    color: #ff007f;
+    font-size: 1rem;
+    font-weight: bold;
+    font-family: inherit;
+    padding: 8px 22px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 0 10px #ff007f;
+    transition: all 0.2s ease;
+}
+
+.btn:active {
+    transform: scale(0.95);
+    background: #ff007f;
+    color: #000;
+}
+
+.start-btn, .resume-btn {
+    border-color: #00f0ff;
+    color: #00f0ff;
+    box-shadow: 0 0 10px #00f0ff;
+}
+
+.start-btn:active, .resume-btn:active {
+    background: #00f0ff;
+    color: #000;
+}
+
+/* Typography Animations */
+.neon-text-blue {
+    color: #00f0ff;
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+    letter-spacing: 2px;
+}
+
+.neon-text-red {
+    color: #ff0055;
+    font-size: 2rem;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055;
+    animation: flicker 1.5s infinite alternate;
+}
+
+@keyframes flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { text-shadow: 0 0 10px #ff0055, 0 0 20px #ff0055; }
+    20%, 24%, 55% { text-shadow: none; }
+}
+
+
+Script:::
+
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+    canvas.width = canvas.parentElement.clientWidth;
+    canvas.height = canvas.parentElement.clientHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Game States: 'START_SCREEN', 'PLAYING', 'PAUSED', 'GAME_OVER'
+let gameState = 'START_SCREEN';
+
+let score = 0;
+let lives = 3;
+let lasers = [];
+let enemies = [];
+let particles = [];
+let enemySpawnTimeout = null;
+
+// Player dimensions
+const player = {
+    x: canvas.width / 2,
+    y: canvas.height - 45,
+    width: 30,
+    height: 30,
+    speed: 6,
+    dx: 0
+};
+
+// UI Elements Elements
+const startScreen = document.getElementById('startScreen');
+const pauseScreen = document.getElementById('pauseScreen');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const startBtn = document.getElementById('startBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const resumeBtn = document.getElementById('resumeBtn');
+const restartBtn = document.getElementById('restartBtn');
+
+// --- EVENT LISTENERS ---
+startBtn.addEventListener('click', startGame);
+pauseBtn.addEventListener('click', togglePause);
+resumeBtn.addEventListener('click', togglePause);
+restartBtn.addEventListener('click', resetGame);
+
+// Mouse Movement & Clicks
+canvas.addEventListener('mousemove', (e) => {
+    if (gameState !== 'PLAYING') return;
+    const rect = canvas.getBoundingClientRect();
+    player.x = e.clientX - rect.left;
+    
+    if (player.x - player.width/2 < 0) player.x = player.width/2;
+    if (player.x + player.width/2 > canvas.width) player.x = canvas.width - player.width/2;
+});
+
+canvas.addEventListener('click', () => {
+    if (gameState === 'PLAYING') shootLaser();
+});
+
+// Keyboard
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'p' || e.key === 'P' || e.key === 'Escape') {
+        togglePause();
+        return;
+    }
+    
+    if (gameState !== 'PLAYING') return;
+    
+    if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') player.dx = -player.speed;
+    if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') player.dx = player.speed;
+    
+    if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault(); 
+        shootLaser();
+    }
+});
+
+window.addEventListener('keyup', (e) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight' || e.key === 'a' || e.key === 'A' || e.key === 'd' || e.key === 'D') {
+        player.dx = 0;
+    }
+});
+
+// --- GAME STATE ACTIONS ---
+function startGame() {
+    gameState = 'PLAYING';
+    startScreen.classList.add('hidden');
+    pauseBtn.classList.remove('hidden');
+    spawnEnemy();
+}
+
+function togglePause() {
+    if (gameState === 'PLAYING') {
+        gameState = 'PAUSED';
+        pauseScreen.classList.remove('hidden');
+        pauseBtn.innerText = 'RESUME';
+        clearTimeout(enemySpawnTimeout); // Stop Spawning while paused
+    } else if (gameState === 'PAUSED') {
+        gameState = 'PLAYING';
+        pauseScreen.classList.add('hidden');
+        pauseBtn.innerText = 'PAUSE';
+        spawnEnemy(); // Re-trigger spawning
+    }
+}
+
+function shootLaser() {
+    lasers.push({ x: player.x, y: player.y - 12, speed: 9, size: 3 });
+    createParticles(player.x, player.y - 12, '#ff007f');
+}
+
+function spawnEnemy() {
+    if (gameState !== 'PLAYING') return;
+    const size = Math.random() * 10 + 8;
+    enemies.push({
+        x: Math.random() * (canvas.width - 40) + 20,
+        y: 15,
+        speed: Math.random() * 1.8 + 2.2,
+        size: size,
+        scale: 0.1,
+        color: '#00f0ff'
+    });
+    // Loop spawn
+    enemySpawnTimeout = setTimeout(spawnEnemy, Math.random() * 850 + 650);
+}
+
+function createParticles(x, y, color) {
+    for (let i = 0; i < 5; i++) {
+        particles.push({
+            x: x, y: y,
+            dx: (Math.random() - 0.5) * 4,
+            dy: (Math.random() - 0.5) * 4,
+            radius: Math.random() * 2,
+            alpha: 1,
+            color: color
+        });
+    }
+}
+
+// Engine Core Updates
+function update() {
+    if (gameState !== 'PLAYING') return;
+
+    if (player.dx !== 0) {
+        player.x += player.dx;
+        if (player.x - player.width/2 < 0) player.x = player.width/2;
+        if (player.x + player.width/2 > canvas.width) player.x = canvas.width - player.width/2;
+    }
+
+    lasers.forEach((laser, index) => {
+        laser.y -= laser.speed;
+        if (laser.y < 0) lasers.splice(index, 1);
+    });
+
+    enemies.forEach((enemy, eIdx) => {
+        enemy.y += enemy.speed;
+        enemy.scale += 0.02; 
+
+        lasers.forEach((laser, lIdx) => {
+            let dist = Math.hypot(laser.x - enemy.x, laser.y - enemy.y);
+            if (dist < (enemy.size * enemy.scale) + laser.size) {
+                createParticles(enemy.x, enemy.y, '#00f0ff');
+                enemies.splice(eIdx, 1);
+                lasers.splice(lIdx, 1);
+                score += 10;
+                document.getElementById('score').innerText = `SCORE: ${score}`;
+            }
+        });
+
+        if (enemy.y > player.y - 8 && Math.abs(enemy.x - player.x) < 28) {
+            enemies.splice(eIdx, 1);
+            lives--;
+            updateLivesUI();
+            createParticles(player.x, player.y, '#ff0055');
+            if (lives <= 0) triggerGameOver();
+        }
+
+        if (enemy.y > canvas.height) enemies.splice(eIdx, 1);
+    });
+
+    particles.forEach((p, idx) => {
+        p.x += p.dx;
+        p.y += p.dy;
+        p.alpha -= 0.03;
+        if (p.alpha <= 0) particles.splice(idx, 1);
+    });
+}
+
+// Draw Graphics
+function draw() {
+    // We still draw the current state behind overlays during pause for an amazing aesthetic
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 3D Grid Floor Lines
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.1)';
+    ctx.lineWidth = 1;
+    for (let i = -30; i <= canvas.width + 30; i += 30) {
+        ctx.beginPath();
+        ctx.moveTo(canvas.width / 2, 0);
+        ctx.lineTo(i, canvas.height);
+        ctx.stroke();
+    }
+
+    lasers.forEach(laser => {
+        ctx.shadowBlur = 8; ctx.shadowColor = '#ff007f'; ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(laser.x, laser.y, laser.size, 0, Math.PI * 2); ctx.fill();
+    });
+
+    enemies.forEach(enemy => {
+        ctx.shadowBlur = 10; ctx.shadowColor = enemy.color; ctx.fillStyle = enemy.color;
+        ctx.save();
+        ctx.translate(enemy.x, enemy.y);
+        ctx.scale(enemy.scale, enemy.scale);
+        ctx.beginPath(); ctx.moveTo(0, -enemy.size); ctx.lineTo(enemy.size, enemy.size); ctx.lineTo(-enemy.size, enemy.size); ctx.closePath(); ctx.fill();
+        ctx.restore();
+    });
+
+    if (gameState !== 'GAME_OVER') {
+        ctx.shadowBlur = 15; ctx.shadowColor = '#ff007f'; ctx.fillStyle = '#ff007f';
+        ctx.beginPath();
+        ctx.moveTo(player.x, player.y - player.height/2);
+        ctx.lineTo(player.x + player.width/2, player.y + player.height/2);
+        ctx.lineTo(player.x - player.width/2, player.y + player.height/2);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(player.x, player.y + 3, 4, 0, Math.PI * 2); ctx.fill();
+    }
+
+    particles.forEach(p => {
+        ctx.shadowBlur = 3; ctx.shadowColor = p.color;
+        ctx.fillStyle = `rgba(${p.color === '#ff007f' ? '255,0,127' : '0,240,255'}, ${p.alpha})`;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2); ctx.fill();
+    });
+
+    ctx.shadowBlur = 0;
+}
+
+function updateLivesUI() {
+    let hearts = '';
+    for(let i=0; i<3; i++) { hearts += i < lives ? '❤️' : '🖤'; }
+    document.getElementById('lives').innerText = `LIVES: ${hearts}`;
+}
+
+function triggerGameOver() {
+    gameState = 'GAME_OVER';
+    clearTimeout(enemySpawnTimeout);
+    pauseBtn.classList.add('hidden');
+    gameOverScreen.classList.remove('hidden');
+}
+
+function resetGame() {
+    score = 0;
+    lives = 3;
+    lasers = [];
+    enemies = [];
+    particles = [];
+    document.getElementById('score').innerText = `SCORE: 0`;
+    updateLivesUI();
+    gameOverScreen.classList.add('hidden');
+    gameState = 'PLAYING';
+    pauseBtn.classList.remove('hidden');
+    pauseBtn.innerText = 'PAUSE';
+    spawnEnemy();
+}
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+loop();
+

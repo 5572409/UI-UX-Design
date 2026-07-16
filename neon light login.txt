@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hyper Neon Cyber Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="quantum-tunnel"></div>
+    <div class="laser-beam vertical-beam"></div>
+    <div class="laser-beam horizontal-beam"></div>
+    <div class="strobe-overlay"></div>
+
+    <div class="login-wrapper">
+        <div class="tech-ring-container">
+            <div class="ring ring-1"></div>
+            <div class="ring ring-2"></div>
+            <div class="ring ring-3"></div>
+        </div>
+
+        <div class="login-container hyper-glow" id="loginForm">
+            <h2 id="formTitle">CORE SYSTEM LINK</h2>
+            
+            <div class="input-group">
+                <input type="text" id="username" required placeholder=" " class="neon-field">
+                <label>Access Identity</label>
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="password" required placeholder=" " class="neon-field">
+                <label>Security Key</label>
+            </div>
+
+            <button class="login-btn" id="loginButton">ENGAGE QUANTUM LINK</button>
+            <p id="statusMessage"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Consolas', 'Courier New', monospace;
+}
+
+body {
+    height: 100vh;
+    background: #020105;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    perspective: 800px;
+}
+
+/* --- DYNAMIC HEAVY LIGHT BACKGROUNDS --- */
+
+/* Moving Cyber Mesh Effect */
+.quantum-tunnel {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background-image: 
+        radial-gradient(circle at 50% 50%, transparent 60%, #020105 100%),
+        linear-gradient(rgba(0, 242, 254, 0.05) 2px, transparent 2px),
+        linear-gradient(90deg, rgba(255, 0, 127, 0.05) 2px, transparent 2px);
+    background-size: 40px 40px;
+    transform: rotateX(60deg);
+    animation: tunnelMove 8s linear infinite;
+    z-index: 1;
+}
+
+@keyframes tunnelMove {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 400px; }
+}
+
+/* Background Cyber Rings (Robot replacement) */
+.tech-ring-container {
+    position: absolute;
+    width: 450px;
+    height: 450px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.ring {
+    position: absolute;
+    border: 2px dashed transparent;
+    border-radius: 50%;
+    mix-blend-mode: screen;
+}
+
+.ring-1 {
+    width: 100%; height: 100%;
+    border-color: rgba(0, 242, 254, 0.3);
+    animation: rotateCW 20s linear infinite, pulseGlow 3s ease infinite;
+}
+
+.ring-2 {
+    width: 80%; height: 80%;
+    border-color: rgba(255, 0, 127, 0.25);
+    border-style: dotted;
+    animation: rotateCCW 15s linear infinite;
+}
+
+.ring-3 {
+    width: 60%; height: 60%;
+    border-color: rgba(157, 0, 255, 0.4);
+    animation: rotateCW 8s linear infinite, pulseGlow 1.5s ease infinite;
+}
+
+@keyframes rotateCW { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes rotateCCW { 0% { transform: rotate(360deg); } 100% { transform: rotate(0deg); } }
+@keyframes pulseGlow { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.9; filter: drop-shadow(0 0 15px currentColor); } }
+
+/* --- INTERFACE CARD & LIQUID RAINBOW BLINK --- */
+.login-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+@keyframes liquidRainbow {
+    0% { border-color: #00f2fe; box-shadow: 0 0 25px #00f2fe, inset 0 0 10px rgba(0,242,254,0.2); }
+    33% { border-color: #ff007f; box-shadow: 0 0 25px #ff007f, inset 0 0 10px rgba(255,0,127,0.2); }
+    66% { border-color: #9d00ff; box-shadow: 0 0 25px #9d00ff, inset 0 0 10px rgba(157,0,255,0.2); }
+    100% { border-color: #00f2fe; box-shadow: 0 0 25px #00f2fe, inset 0 0 10px rgba(0,242,254,0.2); }
+}
+
+.login-container {
+    background: rgba(5, 3, 10, 0.85);
+    backdrop-filter: blur(25px);
+    border: 3px solid transparent;
+    padding: 40px;
+    border-radius: 24px;
+    width: 380px;
+    text-align: center;
+    transform-style: preserve-3d;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hyper-glow {
+    animation: liquidRainbow 6s linear infinite;
+}
+
+h2 {
+    color: #fff;
+    font-size: 22px;
+    margin-bottom: 35px;
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.4);
+}
+
+/* Inputs Animation */
+.input-group {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+@keyframes fieldBlink {
+    0%, 100% { border-color: #251b3d; box-shadow: 0 0 0px transparent; }
+    50% { border-color: #9d00ff; box-shadow: 0 0 8px rgba(157, 0, 255, 0.3); }
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 2px solid #251b3d;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 16px;
+    outline: none;
+    transition: all 0.3s;
+}
+
+.neon-field {
+    animation: fieldBlink 4s ease-in-out infinite;
+}
+
+.input-group input:focus {
+    animation: none;
+    border-color: #00f2fe !important;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.6) !important;
+    background: rgba(0, 242, 254, 0.05);
+}
+
+.input-group label {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #5d4a87;
+    transition: 0.3s;
+    pointer-events: none;
+    letter-spacing: 1px;
+}
+
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+    top: -12px;
+    left: 10px;
+    font-size: 11px;
+    padding: 2px 8px;
+    background: #020105;
+    color: #00f2fe;
+    border-radius: 4px;
+    border: 1px solid #00f2fe;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 15px;
+    background: transparent;
+    border: 2px solid #5d4a87;
+    border-radius: 10px;
+    color: #8c73c7;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.3s;
+}
+
+.btn-ready {
+    background: linear-gradient(45deg, #ff007f, #9d00ff, #00f2fe) !important;
+    background-size: 200% auto !important;
+    animation: shinyBtn 2s linear infinite;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 0 20px rgba(157, 0, 255, 0.6);
+}
+
+@keyframes shinyBtn {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+#statusMessage {
+    margin-top: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    min-height: 20px;
+    letter-spacing: 1px;
+}
+
+/* --- THE HEAVY BLAST EFFECTS --- */
+
+.laser-beam {
+    position: absolute;
+    background: linear-gradient(90deg, transparent, #00f2fe, #ff007f, #9d00ff, transparent);
+    opacity: 0;
+    z-index: 3;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.vertical-beam { width: 6px; height: 200vh; top: -50vh; left: 50%; transform: translateX(-50%); }
+.horizontal-beam { width: 200vw; height: 6px; left: -50vw; top: 50%; transform: translateY(-50%); }
+
+.strobe-overlay {
+    position: absolute;
+    width: 100%; height: 100%;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+}
+
+/* Hyper Success Trigger Classes */
+.hyper-blast-active {
+    animation: hyperStrobe 0.2s linear infinite !important;
+}
+
+.beams-active {
+    opacity: 1 !important;
+    animation: beamSurge 0.5s linear infinite;
+}
+
+.strobe-active {
+    opacity: 1 !important;
+    animation: screenFlash 0.2s ease infinite alternate;
+}
+
+.shake-deny {
+    animation: matrixShake 0.4s ease;
+}
+
+@keyframes hyperStrobe {
+    0% { border-color: #ff007f; box-shadow: 0 0 50px #ff007f; transform: scale(1.05) rotateZ(1deg); }
+    50% { border-color: #00f2fe; box-shadow: 0 0 60px #00f2fe; transform: scale(0.98) rotateZ(-1deg); }
+    100% { border-color: #00ff66; box-shadow: 0 0 50px #00ff66; transform: scale(1.05) rotateZ(0deg); }
+}
+
+@keyframes beamSurge {
+    0% { filter: hue-rotate(0deg); transform: translate(-50%, -50%) scaleX(1); }
+    50% { transform: translate(-50%, -50%) scaleX(3); }
+    100% { filter: hue-rotate(360deg); transform: translate(-50%, -50%) scaleX(1); }
+}
+
+@keyframes screenFlash {
+    from { background: rgba(0, 242, 254, 0.08); }
+    to { background: rgba(157, 0, 255, 0.12); }
+}
+
+@keyframes matrixShake {
+    0%, 100% { transform: translate(0, 0); border-color: #ff0055; box-shadow: 0 0 20px #ff0055; }
+    20% { transform: translate(-8px, 4px); }
+    40% { transform: translate(-6px, -4px); }
+    60% { transform: translate(8px, 6px); }
+    80% { transform: translate(4px, -6px); }
+}
+
+
+
+
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
+const loginBtn = document.getElementById('loginButton');
+const loginForm = document.getElementById('loginForm');
+const statusMessage = document.getElementById('statusMessage');
+const formTitle = document.getElementById('formTitle');
+
+// Visual Overlays
+const beams = document.querySelectorAll('.laser-beam');
+const strobeOverlay = document.querySelector('.strobe-overlay');
+const techRings = document.querySelectorAll('.ring');
+
+// Checking continuous typing inputs to illuminate the master layout
+function monitorSystemSync() {
+    const userVal = usernameInput.value.trim();
+    const passVal = passwordInput.value.trim();
+
+    if (userVal.length > 0 || passVal.length > 0) {
+        loginBtn.classList.add('btn-ready');
+        loginBtn.innerText = "LAUNCH QUANTUM SYNC";
+        
+        // Speed up the ambient tech background rings
+        techRings.forEach((ring, index) => {
+            ring.style.animationDuration = `${(index + 1) * 3}s`;
+        });
+    } else {
+        loginBtn.classList.remove('btn-ready');
+        loginBtn.innerText = "ENGAGE QUANTUM LINK";
+        
+        // Return rings to normal cruise speeds
+        techRings[0].style.animationDuration = "20s";
+        techRings[1].style.animationDuration = "15s";
+        techRings[2].style.animationDuration = "8s";
+    }
+}
+
+usernameInput.addEventListener('input', monitorSystemSync);
+passwordInput.addEventListener('input', monitorSystemSync);
+
+// Master Blast Animation Engine & Auto Recovery
+loginBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    
+    const finalUser = usernameInput.value.trim();
+    const finalPass = passwordInput.value.trim();
+
+    if (finalUser !== "" && finalPass !== "") {
+        // --- 1. THE HEAVY BLAST ANIMATION SEQUENCE ---
+        formTitle.innerText = "LINK ESTABLISHED";
+        formTitle.style.color = "#00ff66";
+        formTitle.style.textShadow = "0 0 20px #00ff66";
+        
+        statusMessage.innerText = "SUCCESS: ACCESS GRANTED. SYNCHRONIZING DATAFEED...";
+        statusMessage.style.color = "#00ff66";
+        
+        // Activate full screen hyper strobes and warp classes
+        loginForm.classList.remove('hyper-glow');
+        loginForm.classList.add('hyper-blast-active');
+
+        beams.forEach(beam => beam.classList.add('beams-active'));
+        strobeOverlay.classList.add('strobe-active');
+
+        // --- 2. THE AUTOMATIC SYSTEM RESET TIME WINDOW ---
+        setTimeout(() => {
+            // Remove heavy hyper active visual FX
+            beams.forEach(beam => beam.classList.remove('beams-active'));
+            strobeOverlay.classList.remove('strobe-active');
+            loginForm.classList.remove('hyper-blast-active');
+            
+            // Re-apply standard beautiful infinite rainbow fluid mode
+            loginForm.classList.add('hyper-glow');
+            
+            formTitle.innerText = "CORE SYSTEM LINK";
+            formTitle.style.color = "#fff";
+            formTitle.style.textShadow = "0 0 10px rgba(255,255,255,0.4)";
+            
+            statusMessage.innerText = "";
+            
+            // Flush entries back to native fresh state
+            usernameInput.value = "";
+            passwordInput.value = "";
+            monitorSystemSync();
+            
+        }, 3000); // 3 seconds window duration before restoring system equilibrium
+
+    } else {
+        // --- MATRIX SHAKE ERROR ENGINE ---
+        loginForm.classList.add('shake-deny');
+        statusMessage.innerText = "CRITICAL ERROR: ACCESS CREDENTIALS REQUIRED!";
+        statusMessage.style.color = "#ff007f";
+        
+        setTimeout(() => {
+            loginForm.classList.remove('shake-deny');
+        }, 400);
+    }
+});

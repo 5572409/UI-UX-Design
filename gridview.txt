@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Bento Grid HUD Simulator</title>
+    <style>
+        :root {
+            --bg-dark: #06060c;
+            --glass-bg: rgba(14, 14, 28, 0.65);
+            --card-glass: rgba(22, 22, 45, 0.45);
+            --card-border: rgba(0, 240, 255, 0.15);
+            --inner-card-bg: rgba(255, 255, 255, 0.03);
+            --inner-card-border: rgba(255, 255, 255, 0.06);
+            
+            /* High-fidelity Neon Palette */
+            --neon-cyan: #00f0ff;
+            --neon-pink: #ff0055;
+            --neon-purple: #b5179e;
+            --neon-amber: #ffaa00;
+            --text-main: #f0f0faff;
+            --text-muted: #6e6e8d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'JetBrains Mono', 'Segoe UI', monospace;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px 20px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 0, 85, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 40%),
+                linear-gradient(rgba(255, 255, 255, 0.005) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.005) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+        }
+
+        /* Outer HUD Wrapper */
+        .hud-container {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--glass-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8), 
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                        0 0 40px rgba(0, 240, 255, 0.03);
+            position: relative;
+        }
+
+        /* Top Bar Indicators */
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .hud-title h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hud-title span {
+            font-size: 0.75rem;
+            color: var(--neon-cyan);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            display: block;
+            margin-top: 4px;
+        }
+
+        /* Tech View Controls */
+        .controls-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 6px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .btn-view {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 18px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-view:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .btn-view.active {
+            color: #000;
+            background: linear-gradient(135deg, var(--neon-cyan), #00a8ff);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+        }
+
+        /* Simulator Interactive Arena */
+        .simulation-deck {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 16px;
+            padding: 40px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            position: relative;
+        }
+
+        /* Screen Wrapper Frame */
+        .view-frame {
+            width: 100%;
+            max-width: 100%;
+            min-width: 340px;
+            transition: width 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            background: rgba(5, 5, 10, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        }
+
+        /* Neon Active Border status line */
+        .view-frame::after {
+            content: '';
+            position: absolute;
+            bottom: -2px; left: 10%; right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .frame-counter {
+            position: absolute;
+            top: -12px;
+            left: 24px;
+            background: #000;
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 2px 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border-radius: 20px;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.2);
+        }
+
+        /* --- MODERNIZED BENTO GRID LAYOUT --- */
+        .matrix-grid {
+            display: grid;
+            gap: 16px;
+            width: 100%;
+            transition: all 0.4s ease;
+        }
+
+        /* Base / Mobile Stack view */
+        .matrix-grid {
+            grid-template-columns: 1fr;
+        }
+
+        /* Advanced Glass Nodes */
+        .node {
+            background: var(--card-glass);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 145px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .node:hover {
+            border-color: rgba(0, 240, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), inset 0 0 10px rgba(0, 240, 255, 0.05);
+        }
+
+        /* Top Tag line inside cards */
+        .node-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .node-tag {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 700;
+        }
+        
+        /* Node variation accents */
+        .n-cyan .node-tag { color: var(--neon-cyan); }
+        .n-pink .node-tag { color: var(--neon-pink); }
+        .n-purple .node-tag { color: var(--neon-purple); }
+        .n-amber .node-tag { color: var(--neon-amber); }
+
+        .node-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+        }
+        .n-cyan .node-dot { background: var(--neon-cyan); box-shadow: 0 0 8px var(--neon-cyan); }
+        .n-pink .node-dot { background: var(--neon-pink); box-shadow: 0 0 8px var(--neon-pink); }
+        .n-purple .node-dot { background: var(--neon-purple); box-shadow: 0 0 8px var(--neon-purple); }
+        .n-amber .node-dot { background: var(--neon-amber); box-shadow: 0 0 8px var(--neon-amber); }
+
+        /* Graphics elements inside cards */
+        .node-body {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+        }
+
+        /* Inner Micro Card Styling */
+        .micro-card {
+            background: var(--inner-card-bg);
+            border: 1px solid var(--inner-card-border);
+            border-radius: 8px;
+            padding: 12px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .node:hover .micro-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Micro Card Internal Components */
+        .wave-loader {
+            display: flex;
+            gap: 4px;
+            align-items: flex-end;
+            height: 45px;
+            width: 100%;
+        }
+        .wave-bar {
+            flex: 1;
+            background: linear-gradient(to top, rgba(255,0,85,0.1), var(--neon-pink));
+            border-radius: 2px;
+            height: 20%;
+        }
+
+        .cyber-btn {
+            width: 100%;
+            height: 38px;
+            border: 1px dashed rgba(0, 240, 255, 0.4);
+            background: rgba(0, 240, 255, 0.05);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: var(--neon-cyan);
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 1px;
+        }
+        
+        .mini-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+        }
+        .mini-item {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .media-placeholder {
+            width: 100%;
+            height: 100%;
+            min-height: 80px;
+            background: repeating-linear-gradient(45deg, rgba(0,240,255,0.02), rgba(0,240,255,0.02) 10px, rgba(0,240,255,0.05) 10px, rgba(0,240,255,0.05) 20px);
+            border: 1px dashed rgba(0,240,255,0.2);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.65rem;
+            color: rgba(0, 240, 255, 0.4);
+        }
+
+        /* Grid State Mappings applied dynamically via wrappers */
+        
+        /* Tablet Mode (Width >= 480px) */
+        .frame-md .matrix-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .frame-md .card-stats { grid-column: span 2; }
+
+        /* Laptop Mode (Width >= 768px) */
+        .frame-lg .matrix-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .frame-lg .card-stats { grid-column: span 1; }
+        .frame-lg .card-hero { grid-column: span 2; }
+        .frame-lg .card-feed { grid-row: span 2; }
+
+        /* Full Desktop Mode (Width >= 1024px) */
+        .frame-xl .matrix-grid {
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 150px);
+            gap: 16px;
+        }
+        .frame-xl .card-stats { grid-column: span 1; grid-row: span 1; }
+        .frame-xl .card-about { grid-column: span 1; grid-row: span 1; }
+        .frame-xl .card-hero { grid-column: span 2; grid-row: span 1; }
+        
+        .frame-xl .card-media { grid-column: span 1; grid-row: span 2; }
+        .frame-xl .card-feat { grid-column: span 1; grid-row: span 1; }
+        .frame-xl .card-feed { grid-column: span 1; grid-row: span 2; }
+        
+        .frame-xl .card-promo { grid-column: span 1; grid-row: span 1; }
+        .frame-xl .card-tasks { grid-column: span 1; grid-row: span 1; }
+        .frame-xl .card-card { grid-column: span 1; grid-row: span 1; }
+    </style>
+</head>
+<body>
+
+    <div class="hud-container">
+        <div class="hud-header">
+            <div class="hud-title">
+                <h2>Bento Engine Matrix</h2>
+                <span>Interactive Reflow Simulator</span>
+            </div>
+            
+            <div class="controls-group">
+                <button class="btn-view" onclick="updateMatrix('sm', this)">MOBILE</button>
+                <button class="btn-view" onclick="updateMatrix('md', this)">TABLET</button>
+                <button class="btn-view" onclick="updateMatrix('lg', this)">LAPTOP</button>
+                <button class="btn-view active" onclick="updateMatrix('xl', this)">DESKTOP</button>
+            </div>
+        </div>
+
+        <div class="simulation-deck">
+            <div id="viewFrame" class="view-frame frame-xl">
+                <div id="frameCounter" class="frame-counter">1024px+ [Breakpoint: Desktop Matrix]</div>
+                
+                <div class="matrix-grid">
+                    
+                    <div class="node n-pink card-stats">
+                        <div class="node-meta"><span class="node-tag">Analytics</span><div class="node-dot"></div></div>
+                        <div class="node-body">
+                            <div class="micro-card">
+                                <div class="wave-loader">
+                                    <div class="wave-bar" style="height: 45%"></div>
+                                    <div class="wave-bar" style="height: 85%"></div>
+                                    <div class="wave-bar" style="height: 60%"></div>
+                                    <div class="wave-bar" style="height: 95%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="node n-cyan card-about">
+                        <div class="node-meta"><span class="node-tag">System Status</span><div class="node-dot"></div></div>
+                        <div class="node-body">
+                            <div class="micro-card">
+                                <div style="font-size: 11px; line-height: 1.5;">
+                                    NODE: <span style="color: #fff;">CORE_LN_39</span><br>
+                                    Uptime: <span style="color: var(--neon-cyan)">99.98%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="node n-purple card-hero">
+                        <div class="node-meta"><span class="node-tag">Main Control</span><div class="node-dot"></div></div>
+                        <div class="node-body">
+                            <div class="micro-card">
+                                <div class="cyber-btn">INITIALIZE CORE SYSTEM</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="node n-cyan card-media">
+                        <div class="node-meta"><span class="node-tag">Visual Stream</span><div class="node-dot"></div></div>
+                        <div class="node-body" style="height: 100%;">
+                            <div class="micro-card" style="height: 100%; justify-content: space-between; gap: 8px;">
+                                <div class="media-placeholder">LIVE CAM FEED</div>
+                                <div style="font-size: 10px; color: var(--text-muted); text-align: center;">FPS: 60.0 // RES: 1080p</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="node n-amber card-feat">
+                        <div class="node-meta"><span class="node-tag">Core Load</span><div class="node-dot"></div></div>
+                        <div class="node-body">
+                            <div class="micro-card" style="align-items: center;">
+                                <div style="font-size: 20px; color: var(--neon-amber); font-weight: bold; text-shadow: 0 0 8px rgba(255,170,0,0.3)">⚡ 98.4%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="node n-pink card-feed">
+                        <div class="node-meta"><span class="node-tag">Activity Logs</span><div class="node-dot"></div></div>
+                        <div class="node-body" style="height: 100%;">
+                            <div class="micro-card" style="justify-content: space-between; gap: 12px; height: 100%;">
+                                <div class="mini-list">
+                                    <div style="font-size: 10px; color: var(--neon-pink); margin-bottom: 4px;">[SECURE_LOG]</div>
+                                    <div class="mini-item" style="width: 90%;"></div>
+                                    <div class="mini-item" style="width: 65%;"></div>
+                                </div>
+                                <div class="mini-list">
+                                    <div style="font-size: 10px; color: var(--text-muted); margin-bottom: 4px;">[SYS_UPDATE]</div>
+                                    <div class="mini-item" style="width: 80%;"></div>
+                                    <div class="mini-item" style="width: 45%;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="node n-amber card-promo">
+                        <div class="node-meta"><span class="node-tag">Network Traffic</span><div class="node-dot"></div></div>
+                        <div class="node-body">
+                            <div class="micro-card">
+                                <div style="font-size: 11px; text-align: center; color: var(--text-main);">
+                                    PORT <span style="color: var(--neon-amber);">8080</span> // INBOUND
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="node n-purple card-tasks">
+                        <div class="node-meta"><span class="node-tag">Process Stack</span><div class="node-dot"></div></div>
+                        <div class="node-body">
+                            <div class="micro-card" style="gap: 8px;">
+                                <div style="font-size: 10px; color: var(--text-muted);">Syncing database...</div>
+                                <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow:hidden;">
+                                    <div style="width: 70%; height: 100%; background: var(--neon-purple); box-shadow: 0 0 8px var(--neon-purple);"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="node n-pink card-card">
+                        <div class="node-meta"><span class="node-tag">Output State</span><div class="node-dot"></div></div>
+                        <div class="node-body">
+                            <div class="micro-card" style="align-items: center;">
+                                <div style="font-size: 12px; color: #fff; letter-spacing: 2px; font-weight: bold; color: var(--neon-pink);">[ COMPLETED ]</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const viewFrame = document.getElementById('viewFrame');
+        const frameCounter = document.getElementById('frameCounter');
+
+        function updateMatrix(mode, btn) {
+            document.querySelectorAll('.btn-view').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            viewFrame.classList.remove('frame-md', 'frame-lg', 'frame-xl');
+
+            if (mode === 'sm') {
+                viewFrame.style.width = '380px';
+                frameCounter.textContent = '380px [Base Mode]';
+            } else if (mode === 'md') {
+                viewFrame.style.width = '600px';
+                viewFrame.classList.add('frame-md');
+                frameCounter.textContent = '600px [Breakpoint: ≥480px]';
+            } else if (mode === 'lg') {
+                viewFrame.style.width = '840px';
+                viewFrame.classList.add('frame-lg');
+                frameCounter.textContent = '840px [Breakpoint: ≥768px]';
+            } else if (mode === 'xl') {
+                viewFrame.style.width = '100%';
+                viewFrame.classList.add('frame-xl');
+                frameCounter.textContent = '1024px+ [Breakpoint: Desktop Matrix]';
+            }
+        }
+    </script>
+</body>
+</html>

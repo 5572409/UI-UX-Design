@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hacker OTP Login</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #0d1a1a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier New', monospace;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ── Animated Grid Background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(0, 255, 65, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 65, 0.04) 1px, transparent 1px);
+      background-size: 30px 30px;
+      animation: gridMove 20s linear infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(30px, 30px); }
+    }
+
+    /* ── Floating Orbs ── */
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+      animation: orbFloat 12s ease-in-out infinite alternate;
+    }
+
+    .orb-1 {
+      width: 350px;
+      height: 350px;
+      background: rgba(0, 255, 65, 0.05);
+      top: -100px;
+      right: -100px;
+    }
+
+    .orb-2 {
+      width: 400px;
+      height: 400px;
+      background: rgba(0, 200, 50, 0.04);
+      bottom: -150px;
+      left: -150px;
+      animation-delay: -5s;
+    }
+
+    .orb-3 {
+      width: 250px;
+      height: 250px;
+      background: rgba(0, 255, 100, 0.04);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation-delay: -10s;
+    }
+
+    @keyframes orbFloat {
+      0% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -20px) scale(1.1); }
+      66% { transform: translate(-20px, 30px) scale(0.9); }
+      100% { transform: translate(10px, -10px) scale(1.05); }
+    }
+
+    /* ── Card Container ── */
+    .card-wrapper {
+      position: relative;
+      z-index: 1;
+      perspective: 800px;
+    }
+
+    /* ── Card ── */
+    .card {
+      background: rgba(10, 20, 18, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      padding: 24px 22px;
+      width: 340px;
+      max-width: 92vw;
+      box-shadow: 
+        0 40px 80px rgba(0, 0, 0, 0.9),
+        inset 0 1px 0 rgba(0, 255, 65, 0.03);
+      position: relative;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    /* ── MULTI-COLOR SNAKE NEON BORDER ── */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: 26px;
+      background: transparent;
+      z-index: -1;
+      padding: 2px;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: snakeBorderMulti 6s ease-in-out infinite;
+    }
+
+    @keyframes snakeBorderMulti {
+      0% {
+        background: conic-gradient(
+          from 0deg,
+          transparent 0%,
+          transparent 20%,
+          #00ff41 20%,
+          #00ff41 25%,
+          transparent 25%,
+          transparent 100%
+        );
+      }
+      16.66% {
+        background: conic-gradient(
+          from 60deg,
+          transparent 0%,
+          transparent 20%,
+          #00ff41 20%,
+          #00ff41 25%,
+          transparent 25%,
+          transparent 100%
+        );
+      }
+      33.33% {
+        background: conic-gradient(
+          from 120deg,
+          transparent 0%,
+          transparent 20%,
+          #ff6b6b 20%,
+          #ff6b6b 25%,
+          transparent 25%,
+          transparent 100%
+        );
+      }
+      50% {
+        background: conic-gradient(
+          from 180deg,
+          transparent 0%,
+          transparent 20%,
+          #ffd93d 20%,
+          #ffd93d 25%,
+          transparent 25%,
+          transparent 100%
+        );
+      }
+      66.66% {
+        background: conic-gradient(
+          from 240deg,
+          transparent 0%,
+          transparent 20%,
+          #6bcbff 20%,
+          #6bcbff 25%,
+          transparent 25%,
+          transparent 100%
+        );
+      }
+      83.33% {
+        background: conic-gradient(
+          from 300deg,
+          transparent 0%,
+          transparent 20%,
+          #a855f7 20%,
+          #a855f7 25%,
+          transparent 25%,
+          transparent 100%
+        );
+      }
+      100% {
+        background: conic-gradient(
+          from 360deg,
+          transparent 0%,
+          transparent 20%,
+          #00ff41 20%,
+          #00ff41 25%,
+          transparent 25%,
+          transparent 100%
+        );
+      }
+    }
+
+    /* Glow layer */
+    .card::after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      border-radius: 28px;
+      background: transparent;
+      z-index: -2;
+      padding: 4px;
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      animation: snakeBorderGlowMulti 6s ease-in-out infinite;
+      filter: blur(10px);
+      opacity: 0.4;
+    }
+
+    @keyframes snakeBorderGlowMulti {
+      0% {
+        background: conic-gradient(
+          from 0deg,
+          transparent 0%,
+          transparent 15%,
+          #00ff41 15%,
+          #00ff41 30%,
+          transparent 30%,
+          transparent 100%
+        );
+      }
+      16.66% {
+        background: conic-gradient(
+          from 60deg,
+          transparent 0%,
+          transparent 15%,
+          #00ff41 15%,
+          #00ff41 30%,
+          transparent 30%,
+          transparent 100%
+        );
+      }
+      33.33% {
+        background: conic-gradient(
+          from 120deg,
+          transparent 0%,
+          transparent 15%,
+          #ff6b6b 15%,
+          #ff6b6b 30%,
+          transparent 30%,
+          transparent 100%
+        );
+      }
+      50% {
+        background: conic-gradient(
+          from 180deg,
+          transparent 0%,
+          transparent 15%,
+          #ffd93d 15%,
+          #ffd93d 30%,
+          transparent 30%,
+          transparent 100%
+        );
+      }
+      66.66% {
+        background: conic-gradient(
+          from 240deg,
+          transparent 0%,
+          transparent 15%,
+          #6bcbff 15%,
+          #6bcbff 30%,
+          transparent 30%,
+          transparent 100%
+        );
+      }
+      83.33% {
+        background: conic-gradient(
+          from 300deg,
+          transparent 0%,
+          transparent 15%,
+          #a855f7 15%,
+          #a855f7 30%,
+          transparent 30%,
+          transparent 100%
+        );
+      }
+      100% {
+        background: conic-gradient(
+          from 360deg,
+          transparent 0%,
+          transparent 15%,
+          #00ff41 15%,
+          #00ff41 30%,
+          transparent 30%,
+          transparent 100%
+        );
+      }
+    }
+
+    /* ── CARD BREAK / SHATTER EFFECT ── */
+    .card.break {
+      animation: cardBreak 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes cardBreak {
+      0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+      10% {
+        transform: scale(0.95) rotate(-2deg);
+        opacity: 0.9;
+      }
+      30% {
+        transform: scale(0.7) rotate(5deg) translateX(-20px);
+        opacity: 0.6;
+      }
+      50% {
+        transform: scale(0.4) rotate(-8deg) translateX(30px) translateY(20px);
+        opacity: 0.3;
+        filter: blur(4px);
+      }
+      65% {
+        transform: scale(0.3) rotate(10deg) translateX(-30px) translateY(30px);
+        opacity: 0.1;
+        filter: blur(8px);
+      }
+      80% {
+        transform: scale(0.4) rotate(-5deg) translateX(20px) translateY(10px);
+        opacity: 0.3;
+        filter: blur(3px);
+      }
+      100% {
+        transform: scale(1) rotate(0deg) translateX(0) translateY(0);
+        opacity: 1;
+        filter: blur(0px);
+      }
+    }
+
+    /* ── SHAKE + BREAK COMBINED ── */
+    .card.break-shake {
+      animation: cardBreak 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .card.break-shake::before {
+      animation: none !important;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        transparent 15%,
+        #ff0000 15%,
+        #ff0000 30%,
+        transparent 30%,
+        transparent 100%
+      ) !important;
+    }
+
+    .card.break-shake::after {
+      animation: none !important;
+      background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        transparent 10%,
+        #ff0000 10%,
+        #ff0000 35%,
+        transparent 35%,
+        transparent 100%
+      ) !important;
+      filter: blur(15px) !important;
+      opacity: 0.8 !important;
+    }
+
+    /* ── Step Dots ── */
+    .steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: rgba(0, 255, 65, 0.08);
+      border: 1px solid rgba(0, 255, 65, 0.04);
+      transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .step-dot.active {
+      background: #00ff41;
+      transform: scale(1.5);
+      box-shadow: 0 0 24px rgba(0, 255, 65, 0.4);
+      border-color: transparent;
+    }
+
+    .step-dot.done {
+      background: #00ff41;
+      transform: scale(1.3);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+      border-color: transparent;
+    }
+
+    /* ── Icon ── */
+    .icon-wrap {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(0, 255, 65, 0.04);
+      border: 1px solid rgba(0, 255, 65, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 22px;
+      box-shadow: 0 0 30px rgba(0, 255, 65, 0.03);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .icon-wrap:hover {
+      transform: scale(1.08) rotate(-4deg) translateY(-2px);
+      box-shadow: 0 0 50px rgba(0, 255, 65, 0.08);
+      border-color: rgba(0, 255, 65, 0.2);
+    }
+
+    h2 {
+      color: #00ff41;
+      font-size: 17px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 3px;
+      letter-spacing: 1.5px;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 0 20px rgba(0, 255, 65, 0.15);
+    }
+
+    .subtitle {
+      color: rgba(0, 255, 65, 0.35);
+      font-size: 11.5px;
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.4;
+      position: relative;
+      z-index: 1;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle span {
+      color: #00ff41;
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+    }
+
+    /* ── Phone Input with Eye Button ── */
+    .phone-wrap {
+      display: flex;
+      align-items: center;
+      background: rgba(0, 255, 65, 0.02);
+      border: 1.5px solid rgba(0, 255, 65, 0.06);
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .phone-wrap:focus-within {
+      border-color: rgba(0, 255, 65, 0.3);
+      box-shadow: 0 0 0 4px rgba(0, 255, 65, 0.04);
+      transform: scale(1.005);
+    }
+
+    .phone-wrap:hover {
+      border-color: rgba(0, 255, 65, 0.12);
+    }
+
+    .flag-code {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 0 12px;
+      font-size: 12px;
+      color: rgba(0, 255, 65, 0.4);
+      font-weight: 600;
+      border-right: 1px solid rgba(0, 255, 65, 0.05);
+      min-width: 68px;
+      transition: all 0.3s;
+    }
+
+    .flag-code .flag {
+      font-size: 17px;
+      transition: transform 0.4s ease;
+    }
+
+    .phone-wrap:focus-within .flag-code .flag {
+      transform: scale(1.1) rotate(-4deg);
+    }
+
+    .phone-input-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    #phoneInput {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #00ff41;
+      font-size: 14px;
+      padding: 11px 12px;
+      letter-spacing: 0.5px;
+      font-family: 'Courier New', monospace;
+      -webkit-text-fill-color: #00ff41;
+      -webkit-background-clip: text;
+      background-clip: text;
+      width: 100%;
+      /* Disable autofill */
+      autocomplete: "off";
+    }
+
+    /* Disable autofill completely */
+    #phoneInput:-webkit-autofill,
+    #phoneInput:-webkit-autofill:hover,
+    #phoneInput:-webkit-autofill:focus,
+    #phoneInput:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 1000px rgba(10, 20, 18, 0.95) inset !important;
+      -webkit-text-fill-color: #00ff41 !important;
+      background-color: transparent !important;
+      caret-color: #00ff41;
+    }
+
+    #phoneInput::placeholder {
+      color: rgba(0, 255, 65, 0.08);
+    }
+
+    /* Eye Button */
+    .eye-btn {
+      background: transparent;
+      border: none;
+      color: rgba(0, 255, 65, 0.3);
+      cursor: pointer;
+      padding: 0 12px 0 0;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .eye-btn:hover {
+      color: #00ff41;
+      transform: scale(1.1);
+    }
+
+    .eye-btn:active {
+      transform: scale(0.9);
+    }
+
+    /* ── OTP Boxes ── */
+    .otp-wrap {
+      display: flex;
+      gap: 7px;
+      justify-content: center;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .otp-box {
+      width: 38px;
+      height: 44px;
+      background: rgba(0, 255, 65, 0.02);
+      border: 1.5px solid rgba(0, 255, 65, 0.06);
+      border-radius: 11px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #00ff41;
+      outline: none;
+      caret-color: #00ff41;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      font-family: 'Courier New', monospace;
+    }
+
+    .otp-box::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(0, 255, 65, 0.08), transparent 70%);
+      border-radius: 50%;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+    }
+
+    .otp-box:hover::before {
+      width: 180%;
+      height: 180%;
+    }
+
+    .otp-box:hover {
+      border-color: rgba(0, 255, 65, 0.2);
+      transform: translateY(-2px) scale(1.04);
+      box-shadow: 0 0 30px rgba(0, 255, 65, 0.04);
+    }
+
+    .otp-box:focus {
+      border-color: #00ff41;
+      background: rgba(0, 255, 65, 0.03);
+      box-shadow: 0 0 0 4px rgba(0, 255, 65, 0.05), 0 0 30px rgba(0, 255, 65, 0.04);
+      transform: translateY(-3px) scale(1.05);
+    }
+
+    .otp-box.filled {
+      border-color: #00ff41;
+      background: rgba(0, 255, 65, 0.03);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.04);
+      animation: popFill 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes popFill {
+      0% { transform: scale(0.7) rotate(-4deg); }
+      50% { transform: scale(1.1) rotate(2deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
+
+    /* ── Timer ── */
+    .timer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 11px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .timer {
+      color: rgba(0, 255, 65, 0.2);
+    }
+
+    .timer span {
+      color: #00ff41;
+      font-weight: 600;
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.15);
+    }
+
+    .resend-btn {
+      background: none;
+      border: none;
+      color: rgba(0, 255, 65, 0.08);
+      font-size: 11px;
+      cursor: not-allowed;
+      transition: all 0.4s ease;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .resend-btn.active {
+      color: #00ff41;
+      cursor: pointer;
+      background-color: rgba(0, 255, 65, 0.03);
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.1);
+    }
+
+    .resend-btn.active:hover {
+      background: rgba(0, 255, 65, 0.06);
+      transform: scale(1.08);
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid rgba(0, 255, 65, 0.15);
+      border-radius: 14px;
+      background: rgba(0, 255, 65, 0.03);
+      color: #00ff41;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 1.5px;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 6px 24px rgba(0, 255, 65, 0.03);
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      font-family: 'Courier New', monospace;
+    }
+
+    .btn::after {
+      content: '>';
+      margin-left: 6px;
+      opacity: 0.5;
+    }
+
+    .btn::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 255, 65, 0.04), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.6s;
+    }
+
+    .btn:hover {
+      background: rgba(0, 255, 65, 0.05);
+      border-color: rgba(0, 255, 65, 0.3);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 12px 40px rgba(0, 255, 65, 0.06);
+    }
+
+    .btn:hover::before {
+      opacity: 1;
+    }
+
+    .btn:active {
+      transform: translateY(0) scale(0.97);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .back-btn {
+      background: rgba(0, 255, 65, 0.02);
+      border: 1px solid rgba(0, 255, 65, 0.05);
+      color: rgba(0, 255, 65, 0.25);
+      padding: 7px 18px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      z-index: 1;
+      font-family: 'Courier New', monospace;
+    }
+
+    .back-btn:hover {
+      background: rgba(0, 255, 65, 0.04);
+      color: #00ff41;
+      transform: translateY(-2px) scale(1.03);
+      border-color: rgba(0, 255, 65, 0.12);
+      box-shadow: 0 4px 20px rgba(0, 255, 65, 0.03);
+    }
+
+    /* ── INLINE TOAST ── */
+    .inline-toast {
+      margin-top: 10px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-10px) scale(0.9);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      z-index: 1;
+      pointer-events: none;
+      min-height: 0;
+      max-height: 0;
+      overflow: hidden;
+      padding: 0 14px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .inline-toast.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      padding: 8px 14px;
+      min-height: 36px;
+      max-height: 80px;
+      pointer-events: auto;
+    }
+
+    .inline-toast.success {
+      background: rgba(0, 255, 65, 0.04);
+      border: 1px solid rgba(0, 255, 65, 0.1);
+      color: #00ff41;
+    }
+
+    .inline-toast.error {
+      background: rgba(255, 50, 50, 0.04);
+      border: 1px solid rgba(255, 50, 50, 0.1);
+      color: #ff6b6b;
+    }
+
+    .inline-toast.info {
+      background: rgba(0, 255, 65, 0.04);
+      border: 1px solid rgba(0, 255, 65, 0.08);
+      color: #00ff41;
+    }
+
+    /* ── BLAST EFFECT ── */
+    .blast-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9998;
+      background: radial-gradient(circle at center, rgba(255, 50, 50, 0.08), transparent 70%);
+      opacity: 0;
+      transition: none;
+    }
+
+    .blast-overlay.active {
+      animation: blastEffect 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes blastEffect {
+      0% { opacity: 0; transform: scale(0.8); }
+      15% { opacity: 1; transform: scale(1); }
+      40% { opacity: 0.6; transform: scale(1.1); }
+      70% { opacity: 0.2; transform: scale(0.95); }
+      100% { opacity: 0; transform: scale(1); }
+    }
+
+    /* ── Success Screen ── */
+    .success-screen {
+      text-align: center;
+      display: none;
+      position: relative;
+      z-index: 1;
+    }
+
+    .success-screen .check-circle {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      background: rgba(0, 255, 65, 0.03);
+      border: 2px solid rgba(0, 255, 65, 0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      font-size: 30px;
+      color: #00ff41;
+      box-shadow: 0 0 60px rgba(0, 255, 65, 0.03);
+      animation: successPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+    }
+
+    .success-screen .check-circle::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 255, 65, 0.06);
+      animation: pulseRing 2s ease-in-out infinite;
+    }
+
+    @keyframes successPop {
+      0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+      50% { transform: scale(1.2) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    @keyframes pulseRing {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.4); opacity: 0; }
+    }
+
+    .success-screen h2 {
+      font-size: 19px;
+      margin-bottom: 3px;
+      animation: fadeUp 0.6s ease 0.2s both;
+    }
+
+    .success-screen .meta {
+      color: rgba(0, 255, 65, 0.2);
+      font-size: 11.5px;
+      margin-bottom: 18px;
+      animation: fadeUp 0.6s ease 0.35s both;
+    }
+
+    @keyframes fadeUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* ── Shake ── */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      15% { transform: translateX(-12px) rotate(-1deg); }
+      30% { transform: translateX(12px) rotate(1deg); }
+      45% { transform: translateX(-8px); }
+      60% { transform: translateX(8px); }
+      80% { transform: translateX(-4px); }
+    }
+
+    .shake {
+      animation: shake 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* ── Screens ── */
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    /* ── Responsive ── */
+    @media (max-width: 380px) {
+      .card { padding: 18px 16px; }
+      .otp-box { width: 34px; height: 40px; font-size: 16px; }
+      .flag-code { min-width: 60px; font-size: 11px; }
+      .flag-code .flag { font-size: 15px; }
+      #phoneInput { font-size: 13px; padding: 10px 10px; }
+      .eye-btn { font-size: 14px; padding: 0 8px 0 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background Orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <!-- Blast Overlay -->
+  <div class="blast-overlay" id="blastOverlay"></div>
+
+  <div class="card-wrapper">
+    <div class="card" id="card">
+
+      <!-- Step Dots -->
+      <div class="steps">
+        <div class="step-dot active" id="dot1"></div>
+        <div class="step-dot" id="dot2"></div>
+        <div class="step-dot" id="dot3"></div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div class="screen active" id="step1">
+        <div class="icon-wrap">💀</div>
+        <h2>Enter Your Number</h2>
+        <p class="subtitle">Secure authentication via <span>6-digit OTP</span></p>
+
+        <div class="phone-wrap">
+          <div class="flag-code">
+            <span class="flag">🇵🇰</span>
+            <span>+92</span>
+          </div>
+          <div class="phone-input-wrapper">
+            <input
+              type="password"
+              id="phoneInput"
+              maxlength="10"
+              placeholder="3XX XXXXXXX"
+              oninput="this.value = this.value.replace(/[^0-9]/g,'')"
+              autocomplete="off"
+              readonly
+              onfocus="this.removeAttribute('readonly')"
+            />
+            <button class="eye-btn" id="eyeBtn" onclick="togglePhoneVisibility()" type="button">
+              👁
+            </button>
+          </div>
+        </div>
+
+        <button class="btn" id="sendOtpBtn" onclick="sendOTP()">
+          SEND OTP
+        </button>
+
+        <!-- Inline Toast -->
+        <div class="inline-toast" id="toast1"></div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="screen" id="step2">
+        <div class="icon-wrap">🔐</div>
+        <h2>Verify OTP</h2>
+        <p class="subtitle" id="otpSubtitle">Code sent to <span>+92 —</span></p>
+
+        <div class="otp-wrap" id="otpWrap">
+          <input class="otp-box" type="tel" maxlength="1" id="o1" oninput="otpInput(this, 'o2')" onkeydown="otpBack(event, null)"/>
+          <input class="otp-box" type="tel" maxlength="1" id="o2" oninput="otpInput(this, 'o3')" onkeydown="otpBack(event, 'o1')"/>
+          <input class="otp-box" type="tel" maxlength="1" id="o3" oninput="otpInput(this, 'o4')" onkeydown="otpBack(event, 'o2')"/>
+          <input class="otp-box" type="tel" maxlength="1" id="o4" oninput="otpInput(this, 'o5')" onkeydown="otpBack(event, 'o3')"/>
+          <input class="otp-box" type="tel" maxlength="1" id="o5" oninput="otpInput(this, 'o6')" onkeydown="otpBack(event, 'o4')"/>
+          <input class="otp-box" type="tel" maxlength="1" id="o6" oninput="otpInput(this, null)" onkeydown="otpBack(event, 'o5')"/>
+        </div>
+
+        <div class="timer-row">
+          <span class="timer">Resend in <span id="countdownDisplay">30s</span></span>
+          <button class="resend-btn" id="resendBtn" onclick="resendOTP()">Resend OTP</button>
+        </div>
+
+        <button class="btn" onclick="verifyOTP()">VERIFY OTP</button>
+
+        <!-- Inline Toast -->
+        <div class="inline-toast" id="toast2"></div>
+
+        <div style="text-align:center; margin-top:10px;">
+          <button class="back-btn" onclick="goBack()">← CHANGE NUMBER</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="screen" id="step3">
+        <div class="success-screen">
+          <div class="check-circle">✓</div>
+          <h2>Access Granted!</h2>
+          <p class="meta">Welcome back! You've been authenticated</p>
+          <button class="back-btn" onclick="resetAll()">← EXIT</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ── CONFIG ──
+    const CORRECT_OTP = '123456';
+    let countdownTimer = null;
+    let storedPhone = '';
+    let isBreaking = false;
+    let isPhoneVisible = false;
+
+    // ── TOGGLE PHONE VISIBILITY ──
+    function togglePhoneVisibility() {
+      const input = document.getElementById('phoneInput');
+      const eyeBtn = document.getElementById('eyeBtn');
+      
+      isPhoneVisible = !isPhoneVisible;
+      
+      if (isPhoneVisible) {
+        input.type = 'text';
+        eyeBtn.textContent = '👁‍🗨';
+        eyeBtn.style.color = '#00ff41';
+      } else {
+        input.type = 'password';
+        eyeBtn.textContent = '👁';
+        eyeBtn.style.color = 'rgba(0, 255, 65, 0.3)';
+      }
+    }
+
+    // ── INLINE TOAST ──
+    function showToast(message, type = 'info', step = 1) {
+      const toast = document.getElementById('toast' + step);
+      toast.textContent = message;
+      toast.className = `inline-toast ${type}`;
+      toast.classList.add('show');
+      
+      clearTimeout(toast._hideTimer);
+      toast._hideTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+
+    // ── BLAST EFFECT ──
+    function blastEffect() {
+      const overlay = document.getElementById('blastOverlay');
+      overlay.classList.remove('active');
+      void overlay.offsetWidth;
+      overlay.classList.add('active');
+      setTimeout(() => overlay.classList.remove('active'), 900);
+    }
+
+    // ── CARD BREAK EFFECT ──
+    function cardBreakEffect() {
+      if (isBreaking) return;
+      isBreaking = true;
+      
+      const card = document.getElementById('card');
+      
+      card.classList.remove('break', 'break-shake', 'red-flash');
+      void card.offsetWidth;
+      card.classList.add('break-shake');
+      blastEffect();
+      
+      setTimeout(() => {
+        card.classList.remove('break-shake');
+        isBreaking = false;
+      }, 900);
+    }
+
+    // ── STEP NAV ──
+    function goStep(n) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('step' + n).classList.add('active');
+
+      const dots = [document.getElementById('dot1'), document.getElementById('dot2'), document.getElementById('dot3')];
+      dots.forEach((d, i) => {
+        d.className = 'step-dot';
+        if (i + 1 < n) d.classList.add('done');
+        if (i + 1 === n) d.classList.add('active');
+      });
+    }
+
+    // ── SEND OTP ──
+    function sendOTP() {
+      const raw = document.getElementById('phoneInput').value.trim();
+
+      if (!raw) {
+        showToast('Enter phone number', 'error', 1);
+        return;
+      }
+      if (raw.length < 10) {
+        showToast('Enter complete number (10 digits)', 'error', 1);
+        return;
+      }
+      if (!raw.startsWith('3')) {
+        showToast('Number must start with 3', 'error', 1);
+        return;
+      }
+
+      storedPhone = '+92 ' + raw;
+      document.getElementById('otpSubtitle').innerHTML = `Code sent to <span>${storedPhone}</span>`;
+
+      ['o1','o2','o3','o4','o5','o6'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = '';
+        el.classList.remove('filled');
+      });
+
+      goStep(2);
+      startCountdown(30);
+      setTimeout(() => document.getElementById('o1').focus(), 100);
+      showToast('OTP sent successfully! ✨', 'success', 2);
+    }
+
+    // ── OTP BOX LOGIC ──
+    function otpInput(current, nextId) {
+      current.value = current.value.replace(/[^0-9]/g, '');
+      if (current.value.length === 1) {
+        current.classList.add('filled');
+        if (nextId) document.getElementById(nextId).focus();
+      } else {
+        current.classList.remove('filled');
+      }
+    }
+
+    function otpBack(event, prevId) {
+      if (event.key === 'Backspace' && event.target.value === '' && prevId) {
+        document.getElementById(prevId).focus();
+      }
+    }
+
+    // ── VERIFY OTP ──
+    function verifyOTP() {
+      const entered = ['o1','o2','o3','o4','o5','o6'].map(id => document.getElementById(id).value).join('');
+
+      if (entered.length < 6) {
+        showToast('Enter full 6-digit OTP', 'error', 2);
+        shakeOTP();
+        return;
+      }
+
+      if (entered === CORRECT_OTP) {
+        clearInterval(countdownTimer);
+        showToast('OTP verified! 🎉', 'success', 2);
+        setTimeout(() => {
+          document.getElementById('step3').querySelector('.success-screen').style.display = 'block';
+          goStep(3);
+        }, 600);
+      } else {
+        showToast('Invalid OTP! Try again', 'error', 2);
+        cardBreakEffect();
+        shakeOTP();
+        ['o1','o2','o3','o4','o5','o6'].forEach(id => {
+          document.getElementById(id).value = '';
+          document.getElementById(id).classList.remove('filled');
+        });
+        setTimeout(() => {
+          document.getElementById('o1').focus();
+        }, 200);
+      }
+    }
+
+    function shakeOTP() {
+      const wrap = document.getElementById('otpWrap');
+      wrap.classList.remove('shake');
+      void wrap.offsetWidth;
+      wrap.classList.add('shake');
+      setTimeout(() => wrap.classList.remove('shake'), 600);
+    }
+
+    // ── COUNTDOWN ──
+    function startCountdown(seconds) {
+      clearInterval(countdownTimer);
+      const display = document.getElementById('countdownDisplay');
+      const resendBtn = document.getElementById('resendBtn');
+      resendBtn.classList.remove('active');
+      resendBtn.style.cursor = 'not-allowed';
+
+      let remaining = seconds;
+      display.textContent = remaining + 's';
+
+      countdownTimer = setInterval(() => {
+        remaining--;
+        display.textContent = remaining + 's';
+        if (remaining <= 0) {
+          clearInterval(countdownTimer);
+          display.textContent = '00';
+          resendBtn.classList.add('active');
+          resendBtn.style.cursor = 'pointer';
+        }
+      }, 1000);
+    }
+
+    // ── RESEND ──
+    function resendOTP() {
+      const btn = document.getElementById('resendBtn');
+      if (!btn.classList.contains('active')) return;
+
+      ['o1','o2','o3','o4','o5','o6'].forEach(id => {
+        document.getElementById(id).value = '';
+        document.getElementById(id).classList.remove('filled');
+      });
+
+      startCountdown(30);
+      document.getElementById('o1').focus();
+      showToast('OTP resent! 🔄', 'info', 2);
+    }
+
+    // ── GO BACK ──
+    function goBack() {
+      clearInterval(countdownTimer);
+      goStep(1);
+    }
+
+    // ── RESET ──
+    function resetAll() {
+      clearInterval(countdownTimer);
+      document.getElementById('phoneInput').value = '';
+      document.getElementById('step3').querySelector('.success-screen').style.display = 'none';
+      goStep(1);
+    }
+
+    // ── ENTER KEY SUPPORT ──
+    document.getElementById('phoneInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') sendOTP();
+    });
+
+    document.querySelectorAll('.otp-box').forEach((box) => {
+      box.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') verifyOTP();
+      });
+    });
+
+    // ── PREVENT AUTOFILL COMPLETELY ──
+    document.addEventListener('DOMContentLoaded', function() {
+      const phoneInput = document.getElementById('phoneInput');
+      
+      // Additional autofill prevention
+      phoneInput.setAttribute('autocomplete', 'off');
+      phoneInput.setAttribute('readonly', 'readonly');
+      
+      // Remove readonly on focus so user can type
+      phoneInput.addEventListener('focus', function() {
+        this.removeAttribute('readonly');
+      });
+      
+      // Re-add readonly if input loses focus and is empty
+      phoneInput.addEventListener('blur', function() {
+        if (this.value === '') {
+          this.setAttribute('readonly', 'readonly');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

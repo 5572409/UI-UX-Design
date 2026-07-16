@@ -1,0 +1,282 @@
+html:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic Neon Toggles</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="toggle-container">
+        
+        <div class="toggle-box">
+            <span class="toggle-label">Simple Toggle Button</span>
+            <label class="simple-switch">
+                <input type="checkbox">
+                <span class="simple-slider"></span>
+            </label>
+        </div>
+
+        <div class="toggle-box">
+            <span class="toggle-label">Premium Toggle Button</span>
+            <div class="premium-switch-wrapper">
+                <div class="neon-blink-glow"></div>
+                
+                <label class="premium-switch">
+                    <input type="checkbox" id="premiumToggle">
+                    <span class="premium-slider">
+                        <span class="jelly-knob"></span>
+                    </span>
+                </label>
+            </div>
+            <span id="toggleStatus" class="status-text text-off">OFF</span>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+css:
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: #07050f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+/* Center Wrapper */
+.toggle-container {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 50px 60px;
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+}
+
+.toggle-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.toggle-label {
+    color: #a295c9;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* ==========================================
+   1. SIMPLE TOGGLE STYLING
+   ========================================== */
+.simple-switch {
+    position: relative;
+    width: 60px;
+    height: 34px;
+}
+
+.simple-switch input { opacity: 0; width: 0; height: 0; }
+
+.simple-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #251b3d;
+    transition: .4s;
+    border-radius: 34px;
+}
+
+.simple-slider:before {
+    position: absolute;
+    content: "";
+    height: 26px; width: 26px;
+    left: 4px; bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+.simple-switch input:checked + .simple-slider {
+    background-color: #9d00ff;
+}
+
+.simple-switch input:checked + .simple-slider:before {
+    transform: translateX(26px);
+}
+
+
+/* ==========================================
+   2. PREMIUM JELLY NEON TOGGLE STYLING
+   ========================================== */
+.premium-switch-wrapper {
+    position: relative;
+    width: 90px;
+    height: 46px;
+    border-radius: 50px;
+}
+
+/* Continuous Neon Blinking Border */
+@keyframes neonBorderBlink {
+    0%, 100% { box-shadow: 0 0 8px #ff007f, inset 0 0 4px #ff007f; }
+    50% { box-shadow: 0 0 18px #00f2fe, inset 0 0 8px #00f2fe; }
+}
+
+.neon-blink-glow {
+    position: absolute;
+    top: -3px; left: -3px; right: -3px; bottom: -3px;
+    border-radius: 50px;
+    border: 2px solid transparent;
+    animation: neonBorderBlink 3s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.premium-switch {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+}
+
+.premium-switch input { opacity: 0; width: 0; height: 0; }
+
+.premium-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #120d24;
+    border-radius: 50px;
+    transition: background 0.5s ease;
+    overflow: hidden;
+}
+
+/* Stretchy Jelly Knob Effect */
+.jelly-knob {
+    position: absolute;
+    content: "";
+    height: 36px;
+    width: 36px;
+    left: 5px;
+    bottom: 5px;
+    background: radial-gradient(circle at 30% 30%, #ff66b2, #ff007f);
+    border-radius: 50%;
+    box-shadow: 0 0 15px #ff007f;
+    /* Cubic-bezier curve handles the bouncy/stretchy jelly movement */
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Liquid Neon background flow on state change */
+.premium-slider::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 242, 254, 0.2));
+    transition: all 0.6s ease;
+}
+
+/* --- ON STATE TRANSITIONS --- */
+
+/* Jab toggle ON hoga: Stretchy animation aur width expansion (Jelly look) */
+.premium-switch input:checked + .premium-slider .jelly-knob {
+    left: calc(100% - 41px);
+    background: radial-gradient(circle at 30% 30%, #99faff, #00f2fe);
+    box-shadow: 0 0 20px #00f2fe, 0 0 35px #00f2fe;
+    transform: scaleX(1.25); /* Horizontal stretch while moving */
+}
+
+/* When active, trigger smooth transition back to circle */
+.premium-switch input:atomic + .premium-slider .jelly-knob {
+    transform: scaleX(1);
+}
+
+.premium-switch input:checked + .premium-slider {
+    background: #0a1b29;
+}
+
+.premium-switch input:checked + .premium-slider::before {
+    left: 0;
+}
+
+/* ON/OFF Status Text Typography */
+.status-text {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    transition: all 0.4s ease;
+    margin-top: 5px;
+}
+
+.text-off {
+    color: #ff007f;
+    text-shadow: 0 0 10px #ff007f;
+}
+
+.text-on {
+    color: #00f2fe;
+    text-shadow: 0 0 15px #00f2fe;
+    animation: textPulse 0.3s ease;
+}
+
+@keyframes textPulse {
+    0% { transform: scale(0.8); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+
+
+
+script.js
+
+
+const premiumToggle = document.getElementById('premiumToggle');
+const toggleStatus = document.getElementById('toggleStatus');
+const jellyKnob = document.querySelector('.jelly-knob');
+
+premiumToggle.addEventListener('change', function() {
+    if (this.checked) {
+        // Change text state to ON
+        toggleStatus.innerText = "ON";
+        toggleStatus.className = "status-text text-on";
+        
+        // Stretchy bounce effect handle: thori der ke liye squeeze karna jab load hit ho
+        jellyKnob.style.transform = "scaleX(1.3) scaleY(0.8)";
+        setTimeout(() => {
+            jellyKnob.style.transform = "scaleX(1) scaleY(1)";
+        }, 250);
+        
+    } else {
+        // Change text state to OFF
+        toggleStatus.innerText = "OFF";
+        toggleStatus.className = "status-text text-off";
+        
+        // Reverse stretchy effect logic
+        jellyKnob.style.transform = "scaleX(1.3) scaleY(0.8)";
+        setTimeout(() => {
+            jellyKnob.style.transform = "scaleX(1) scaleY(1)";
+        }, 250);
+    }
+});

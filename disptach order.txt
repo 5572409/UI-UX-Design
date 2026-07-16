@@ -1,0 +1,267 @@
+html::
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Order Dispatch</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <button class="order-btn" id="orderBtn">
+        <span class="btn-text">Dispatch Order</span>
+        
+        <div class="animation-container">
+            <div class="road-lines"></div>
+            <div class="parcel-box"></div>
+            
+            <svg class="delivery-van" viewBox="0 0 65 30" width="65" height="30">
+                <g class="van-door">
+                    <rect x="0" y="3" width="3" height="20" fill="#f8fafc" stroke="#475569" stroke-width="0.5"/>
+                </g>
+                <path d="M3,4 C3,2 5,1 7,1 L44,1 L44,25 L3,25 Z" fill="#1e40af"/>
+                <path d="M44,4 L53,4 C56,4 58,6 59,9 L63,14 C64,15.5 65,17 65,19 L65,25 L44,25 Z" fill="#2563eb"/>
+                <path d="M47,7 L54,7 C56,7 57,8 57,10 L57,14 L47,14 Z" fill="#93c5fd"/>
+                <circle cx="16" cy="25" r="4.5" fill="#0f172a"/>
+                <circle cx="16" cy="25" r="1.5" fill="#ffffff"/>
+                <circle cx="49" cy="25" r="4.5" fill="#0f172a"/>
+                <circle cx="49" cy="25" r="1.5" fill="#ffffff"/>
+                <polygon class="van-light" points="65,17 80,13 80,24 65,20" fill="rgba(253, 224, 71, 0.4)"/>
+            </svg>
+        </div>
+
+        <span class="success-text">On Its Way ✓</span>
+    </button>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+CSS::
+
+:root {
+    --bg-space: #020617;
+    --btn-normal: #1e293b;
+    --success-emerald: #10b981;
+    --text-pure: #ffffff;
+}
+
+body {
+    background-color: var(--bg-space);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* --- Base Button Structure --- */
+.order-btn {
+    appearance: none;
+    border: none;
+    background: var(--btn-normal);
+    color: var(--text-pure);
+    width: 250px;
+    height: 64px;
+    border-radius: 32px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    /* Updated transitions for ultra-smooth hover effect */
+    transition: background-color 0.4s cubic-bezier(0.19, 1, 0.22, 1), 
+                transform 0.4s cubic-bezier(0.19, 1, 0.22, 1), 
+                width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s ease;
+}
+
+/* --- THE NEW PREMIUM HOVER ANIMATION: Ripple Pulse & Glow --- */
+.order-btn:hover:not(.animating):not(.done) {
+    background: #111827; /* Slightly darker shift */
+    transform: scale(1.05); /* Fluid grow */
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.5), inset 0 0 10px rgba(59, 130, 246, 0.3);
+    border: 1px solid rgba(59, 130, 246, 0.4); /* Optional slight border activation */
+}
+
+.order-btn:active {
+    transform: scale(0.98); /* Slight press effect */
+}
+
+/* --- Text visibility separation (Unchanged) --- */
+.btn-text {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    text-align: center;
+    display: block;
+    opacity: 1;
+    pointer-events: none;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.success-text {
+    position: absolute;
+    width: 100%;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%) scale(0.7);
+    text-align: center;
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* --- Canvas Stage & Objects (Unchanged) --- */
+.animation-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    visibility: hidden;
+    background: #0f172a;
+}
+
+.road-lines {
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    top: 64%;
+    background: linear-gradient(90deg, #fff 0%, #fff 60%, transparent 60%, transparent 100%);
+    background-size: 20px 2px;
+    opacity: 0.2;
+}
+
+.parcel-box {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: #d97706;
+    border: 1px solid #f59e0b;
+    border-radius: 1px;
+    top: 45%;
+    left: -20px;
+    z-index: 5;
+}
+
+.delivery-van {
+    position: absolute;
+    top: 24%;
+    left: -80px;
+    z-index: 2;
+}
+
+.van-door {
+    transform-origin: 3px 3px;
+}
+
+/* --- ACTIVE SELECTORS DURING ANIMATION (Unchanged) --- */
+.order-btn.animating {
+    width: 290px;
+    cursor: default;
+}
+
+.order-btn.animating .btn-text {
+    opacity: 0;
+    transform: translateY(-80px);
+}
+
+.order-btn.animating .animation-container {
+    opacity: 1;
+    visibility: visible;
+}
+
+.order-btn.animating .road-lines { animation: moveTrack 0.4s linear infinite; }
+.order-btn.animating .delivery-van { animation: driveProcess 4.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+.order-btn.animating .van-door { animation: doorControl 4.2s ease forwards; }
+.order-btn.animating .parcel-box { animation: loadSequence 4.2s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+
+/* --- FINISHED STATE (Unchanged) --- */
+.order-btn.done {
+    background: var(--success-emerald);
+    width: 250px;
+}
+
+.order-btn.done .btn-text {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+.order-btn.done .animation-container {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.order-btn.done .success-text {
+    display: block !important;
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+/* --- Keyframes (Unchanged) --- */
+@keyframes moveTrack {
+    0% { background-position: 0px 0; }
+    100% { background-position: -20px 0; }
+}
+@keyframes driveProcess {
+    0% { left: -80px; }
+    25%, 70% { left: 95px; }
+    75% { left: 91px; }
+    100% { left: 340px; }
+}
+@keyframes doorControl {
+    0%, 25% { transform: rotate(0deg); }
+    35%, 60% { transform: rotate(-100deg); }
+    70%, 100% { transform: rotate(0deg); }
+}
+@keyframes loadSequence {
+    0% { left: 10px; transform: translateY(-30px); opacity: 0; }
+    28% { opacity: 0; left: 45px; transform: translateY(-30px); }
+    35% { opacity: 1; left: 45px; transform: translateY(-15px); }
+    48% { left: 78px; transform: translateY(-6px); }
+    56% { left: 94px; transform: translateY(2px); opacity: 0; }
+    100% { opacity: 0; }
+}
+
+
+
+Script::::
+
+const orderBtn = document.getElementById('orderBtn');
+const btnText = document.querySelector('.btn-text');
+
+orderBtn.addEventListener('click', () => {
+    if (orderBtn.classList.contains('animating') || orderBtn.classList.contains('done')) {
+        return;
+    }
+
+    // Reset layout visibility just in case
+    btnText.style.display = 'block';
+
+    // Start Animation
+    orderBtn.classList.add('animating');
+
+    // Switch states strictly after 4.2s when van exits
+    setTimeout(() => {
+        orderBtn.classList.remove('animating');
+        btnText.style.display = 'none'; // Hard remove dispatch text from viewport
+        orderBtn.classList.add('done');
+    }, 4200);
+
+    // Auto-Reset loop back to original state after 8 seconds
+    setTimeout(() => {
+        orderBtn.classList.remove('done');
+        btnText.style.display = 'block';
+    }, 8000);
+});

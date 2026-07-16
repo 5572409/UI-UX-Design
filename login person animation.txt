@@ -1,0 +1,707 @@
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+
+void main() => runApp(const MyApp());
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: VideoStyleScreen(),
+    );
+  }
+}
+
+class VideoStyleScreen extends StatefulWidget {
+  const VideoStyleScreen({super.key});
+
+  @override
+  State<VideoStyleScreen> createState() => _VideoStyleScreenState();
+}
+
+class _VideoStyleScreenState extends State<VideoStyleScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 8),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, c) {
+            final width = math.min(c.maxWidth - 28.0, 420.0);
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: c.maxHeight),
+                child: Column(
+                  children: [
+                    SizedBox(height: math.max(26.0, c.maxHeight * 0.075)),
+                    SizedBox(width: width, child: _Stage(animation: controller)),
+                    const SizedBox(height: 38.0),
+                    SizedBox(width: width * 0.86, child: _CodeWindow(animation: controller)),
+                    const SizedBox(height: 30.0),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _Stage extends StatelessWidget {
+  const _Stage({required this.animation});
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 16.0 / 9.0,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(2.0),
+        child: ColoredBox(
+          color: const Color(0xFF10B981),
+          child: AnimatedBuilder(
+            animation: animation,
+            builder: (_, __) {
+              return LayoutBuilder(
+                builder: (context, c) {
+                  final t = animation.value;
+                  final w = c.maxWidth;
+                  final h = c.maxHeight;
+
+                  // Walking animation - natural leg movement
+                  final walkPhase = _p(t, 0.0, 0.35);
+                  final walkCycle = math.sin(walkPhase * math.pi * 4.0);
+                  final walkLegLeft = walkCycle * 8.0;
+                  final walkLegRight = -walkCycle * 8.0;
+                  
+                  // Walking position from left to center
+                  final manLeft = _mix(w * -0.15, w * 0.35, walkPhase);
+                  
+                  // Grab form animation
+                  final grabPhase = _p(t, 0.35, 0.55);
+                  final grabRotation = grabPhase * 0.15;
+                  
+                  // Form pull animation
+                  final formPullPhase = _p(t, 0.35, 0.55);
+                  final formPullLeft = _mix(w * 0.58, w * 0.48, formPullPhase);
+                  
+                  // Actions phase
+                  final glassesRemove = _p(t, 0.55, 0.62);
+                  final glassesWave = _p(t, 0.62, 0.72);
+                  final pocketHand = _p(t, 0.65, 0.75);
+                  
+                  // Face turn animation
+                  final facePhase = _p(t, 0.75, 1.0);
+                  final faceRotation = facePhase * 0.25;
+                  
+                  // Head movement
+                  final headBob = math.sin(walkPhase * math.pi * 4.0) * 2.0;
+                  
+                  final manW = w * 0.16;
+                  final manH = h * 0.65;
+                  final manTop = h * 0.25 + headBob;
+
+                  final formIn = Curves.easeOutBack.transform(_p(t, 0.0, 0.15));
+                  final formOpacity = _p(t, 0.02, 0.18);
+
+                  return Stack(
+                    clipBehavior: Clip.hardEdge,
+                    children: [
+                      Positioned.fill(child: CustomPaint(painter: _StageBg(t))),
+                      // Login form card
+                      Positioned(
+                        left: formPullLeft,
+                        top: h * 0.31,
+                        width: w * 0.33,
+                        child: Opacity(
+                          opacity: formOpacity,
+                          child: Transform.scale(
+                            scale: _mix(0.86, 1.0, formOpacity),
+                            child: const _LoginMockup(),
+                          ),
+                        ),
+                      ),
+                      // Realistic character
+                      Positioned(
+                        left: manLeft,
+                        top: manTop,
+                        width: manW,
+                        height: manH,
+                        child: CustomPaint(
+                          painter: _RealisticCharacterPainter(
+                            walkPhase: walkPhase,
+                            walkLegLeft: walkLegLeft,
+                            walkLegRight: walkLegRight,
+                            grabPhase: grabPhase,
+                            grabRotation: grabRotation,
+                            glassesRemove: glassesRemove,
+                            glassesWave: glassesWave,
+                            pocketHand: pocketHand,
+                            faceRotation: faceRotation,
+                            headBob: headBob,
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LoginMockup extends StatelessWidget {
+  const _LoginMockup();
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (_, c) {
+        final titleSize = math.max(5.5, c.maxWidth * 0.075);
+        final fieldH = math.max(7.0, c.maxWidth * 0.105);
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                'Sign In',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.82),
+                  fontSize: titleSize,
+                  fontWeight: FontWeight.w700,
+                  height: 1.0,
+                ),
+              ),
+            ),
+            SizedBox(height: fieldH * 0.45),
+            _FakeField(height: fieldH, label: 'Email'),
+            SizedBox(height: fieldH * 0.35),
+            _FakeField(height: fieldH, label: 'Password'),
+            SizedBox(height: fieldH * 0.42),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Container(
+                height: fieldH * 0.9,
+                width: c.maxWidth * 0.54,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF059669),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+                child: Text(
+                  'LOGIN',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: titleSize * 0.68,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _FakeField extends StatelessWidget {
+  const _FakeField({required this.height, required this.label});
+  final double height;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: height,
+      padding: EdgeInsets.symmetric(horizontal: height * 0.35),
+      alignment: Alignment.centerLeft,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4.0),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: const Color(0xFF94A3B8),
+          fontSize: height * 0.52,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
+
+class _CodeWindow extends StatelessWidget {
+  const _CodeWindow({required this.animation});
+  final Animation<double> animation;
+
+  static const pink = Color(0xFFFF6B9A);
+  static const blue = Color(0xFF7DD3FC);
+  static const green = Color(0xFF74F2A6);
+  static const yellow = Color(0xFFFDE68A);
+  static const muted = Color(0xFF768197);
+  static const plain = Color(0xFFE5E7EB);
+
+  @override
+  Widget build(BuildContext context) {
+    return AspectRatio(
+      aspectRatio: 16.0 / 9.0,
+      child: AnimatedBuilder(
+        animation: animation,
+        builder: (_, __) {
+          return LayoutBuilder(
+            builder: (_, c) {
+              final fontSize = math.max(6.2, c.maxWidth * 0.027);
+              final lines = _lines();
+              final t = animation.value;
+
+              return Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10151F),
+                  borderRadius: BorderRadius.circular(6.0),
+                  border: Border.all(color: const Color(0xFF1F2937)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.45),
+                      blurRadius: 22.0,
+                      offset: const Offset(0.0, 12.0),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      height: c.maxHeight * 0.17,
+                      padding: EdgeInsets.symmetric(horizontal: c.maxWidth * 0.035),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF151B27),
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(6.0)),
+                      ),
+                      child: Row(
+                        children: [
+                          const _Dot(Color(0xFFFF5F57)),
+                          const SizedBox(width: 4.0),
+                          const _Dot(Color(0xFFFFBD2E)),
+                          const SizedBox(width: 4.0),
+                          const _Dot(Color(0xFF28C840)),
+                          const SizedBox(width: 10.0),
+                          Text(
+                            'index.html',
+                            style: TextStyle(
+                              color: const Color(0xFFAAB3C5),
+                              fontSize: fontSize * 0.85,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          c.maxWidth * 0.05,
+                          c.maxHeight * 0.045,
+                          c.maxWidth * 0.04,
+                          c.maxHeight * 0.03,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            for (var i = 0; i < lines.length; i++)
+                              Opacity(
+                                opacity: _p(t, i * 0.045, i * 0.045 + 0.18),
+                                child: SizedBox(
+                                  height: fontSize * 1.35,
+                                  child: RichText(
+                                    maxLines: 1,
+                                    overflow: TextOverflow.clip,
+                                    text: TextSpan(
+                                      style: TextStyle(
+                                        fontFamily: 'monospace',
+                                        fontSize: fontSize,
+                                        height: 1.15,
+                                      ),
+                                      children: lines[i],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  List<List<TextSpan>> _lines() => [
+    [_s('<!DOCTYPE html>', muted)],
+    [_s('<html ', pink), _s('lang', blue), _s('="en"', green), _s('>', pink)],
+    [_s('<head>', pink)],
+    [_s('  <meta ', pink), _s('charset', blue), _s('="UTF-8"', green), _s('>', pink)],
+    [_s('  <title>', pink), _s('Animation Portal', plain), _s('</title>', pink)],
+    [_s('  <link ', pink), _s('rel', blue), _s('="stylesheet"', green), _s('>', pink)],
+    [_s('</head>', pink)],
+    [_s('<body>', pink)],
+    [_s('  <div ', pink), _s('class', blue), _s('="stage"', green), _s('>', pink)],
+    [_s('    <section ', pink), _s('id', blue), _s('="form"', green), _s('>', pink)],
+    [_s('      <input ', pink), _s('type', blue), _s('="text"', green), _s('>', pink)],
+    [_s('    </section>', pink)],
+  ];
+
+  TextSpan _s(String text, Color color) {
+    return TextSpan(text: text, style: TextStyle(color: color));
+  }
+}
+
+class _Dot extends StatelessWidget {
+  const _Dot(this.color);
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 6.0,
+      height: 6.0,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
+  }
+}
+
+class _StageBg extends CustomPainter {
+  const _StageBg(this.t);
+  final double t;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Subtle glow effect
+    final glow = Paint()
+      ..shader = RadialGradient(
+        colors: [
+          Colors.white.withOpacity(0.08),
+          Colors.white.withOpacity(0.0),
+        ],
+      ).createShader(
+        Rect.fromCircle(
+          center: Offset(size.width * (0.25 + t * 0.15), size.height * 0.5),
+          radius: size.width * 0.35,
+        ),
+      );
+
+    canvas.drawRect(Offset.zero & size, glow);
+
+    // Grid lines
+    final line = Paint()
+      ..color = Colors.white.withOpacity(0.025)
+      ..strokeWidth = 1.0;
+
+    for (var i = 1; i < 5; i++) {
+      final x = size.width * i / 5.0;
+      canvas.drawLine(Offset(x, 0.0), Offset(x, size.height), line);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _StageBg oldDelegate) => oldDelegate.t != t;
+}
+
+class _RealisticCharacterPainter extends CustomPainter {
+  const _RealisticCharacterPainter({
+    required this.walkPhase,
+    required this.walkLegLeft,
+    required this.walkLegRight,
+    required this.grabPhase,
+    required this.grabRotation,
+    required this.glassesRemove,
+    required this.glassesWave,
+    required this.pocketHand,
+    required this.faceRotation,
+    required this.headBob,
+  });
+
+  final double walkPhase;
+  final double walkLegLeft;
+  final double walkLegRight;
+  final double grabPhase;
+  final double grabRotation;
+  final double glassesRemove;
+  final double glassesWave;
+  final double pocketHand;
+  final double faceRotation;
+  final double headBob;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final skin = Paint()..color = const Color(0xFFD4A574);
+    final shirt = Paint()..color = const Color(0xFF3B82F6);
+    final pants = Paint()..color = const Color(0xFF1F2937);
+    final shoes = Paint()..color = const Color(0xFF000000);
+    final hair = Paint()..color = const Color(0xFF78350F);
+    final shirtDark = Paint()..color = const Color(0xFF1E40AF);
+
+    canvas.save();
+    canvas.translate(size.width / 2.0, size.height * 0.95);
+    canvas.scale(size.width / 100.0, size.height / 150.0);
+
+    // Shadow
+    canvas.drawOval(
+      Rect.fromCenter(center: const Offset(0.0, 4.0), width: 50.0, height: 10.0),
+      Paint()..color = Colors.black.withOpacity(0.15),
+    );
+
+    // Apply body rotation for grabbing
+    canvas.rotate(grabRotation);
+
+    // Legs
+    final legLeft = 8.0 + walkLegLeft;
+    final legRight = -8.0 + walkLegRight;
+
+    // Left leg
+    canvas.drawLine(
+      const Offset(-6.0, -55.0),
+      Offset(-8.0 + legLeft * 0.5, -30.0 + legLeft * 0.3),
+      Paint()
+        ..color = const Color(0xFF1F2937)
+        ..strokeWidth = 8.0
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // Right leg
+    canvas.drawLine(
+      const Offset(6.0, -55.0),
+      Offset(8.0 + legRight * 0.5, -30.0 + legRight * 0.3),
+      Paint()
+        ..color = const Color(0xFF1F2937)
+        ..strokeWidth = 8.0
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // Shoes
+    canvas.drawLine(
+      Offset(-8.0 + legLeft * 0.5, -25.0),
+      Offset(-12.0 + legLeft * 0.5, -22.0),
+      Paint()
+        ..color = shoes.color
+        ..strokeWidth = 6.0
+        ..strokeCap = StrokeCap.round,
+    );
+
+    canvas.drawLine(
+      Offset(8.0 + legRight * 0.5, -25.0),
+      Offset(12.0 + legRight * 0.5, -22.0),
+      Paint()
+        ..color = shoes.color
+        ..strokeWidth = 6.0
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // Torso
+    canvas.drawPath(
+      Path()
+        ..moveTo(-10.0, -55.0)
+        ..lineTo(10.0, -55.0)
+        ..lineTo(8.0, -30.0)
+        ..lineTo(-8.0, -30.0)
+        ..close(),
+      shirt,
+    );
+
+    // Shirt details
+    canvas.drawLine(const Offset(-2.0, -55.0), const Offset(-2.0, -30.0), shirtDark);
+    canvas.drawLine(const Offset(2.0, -55.0), const Offset(2.0, -30.0), shirtDark);
+
+    // Neck
+    canvas.drawCircle(const Offset(0.0, -30.0), 3.5, skin);
+
+    // Arms with actions
+    const armLeftY = -50.0;
+    const armLeftX = -11.0;
+
+    // Left arm - normal walking
+    final armLeftEndX = armLeftX - 8.0 - walkLegLeft * 0.4;
+    final armLeftEndY = armLeftY + 20.0 + walkLegLeft * 0.2;
+
+    canvas.drawLine(
+      Offset(armLeftX, armLeftY),
+      Offset(armLeftEndX, armLeftEndY),
+      Paint()
+        ..color = shirt.color
+        ..strokeWidth = 7.0
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // Hand left
+    canvas.drawCircle(
+      Offset(armLeftEndX, armLeftEndY),
+      2.5,
+      skin,
+    );
+
+    // Right arm - reaches for form during grab
+    final armRightGrabRotation = _mix(0.0, 0.4, grabPhase);
+    const armRightY = -50.0;
+    const armRightX = 11.0;
+    final armRightEndX = armRightX + (8.0 + walkLegRight * 0.4) + (armRightGrabRotation * 12.0);
+    final armRightEndY = armRightY + 20.0 - (armRightGrabRotation * 8.0);
+
+    canvas.drawLine(
+      Offset(armRightX, armRightY),
+      Offset(armRightEndX, armRightEndY),
+      Paint()
+        ..color = shirt.color
+        ..strokeWidth = 7.0
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // Hand right - interaction with form
+    final handRightX = armRightEndX + (pocketHand * 3.0);
+    final handRightY = armRightEndY - (pocketHand * 2.0);
+
+    canvas.drawCircle(
+      Offset(handRightX, handRightY),
+      2.5,
+      skin,
+    );
+
+    // Head
+    canvas.drawCircle(const Offset(0.0, -75.0), 10.0, skin);
+
+    // Hair
+    canvas.drawPath(
+      Path()
+        ..moveTo(-10.0, -82.0)
+        ..quadraticBezierTo(-12.0, -85.0, -8.0, -87.0)
+        ..quadraticBezierTo(0.0, -88.0, 8.0, -87.0)
+        ..quadraticBezierTo(12.0, -85.0, 10.0, -82.0)
+        ..close(),
+      hair,
+    );
+
+    // Eyes and Glasses
+    final glassesOpacity = 1.0 - glassesRemove;
+    final glassesOffsetY = glassesRemove * 8.0;
+
+    canvas.save();
+    canvas.translate(0.0, -75.0 + glassesOffsetY);
+    canvas.rotate(faceRotation);
+
+    // Left eye/glass
+    canvas.saveLayer(null, Paint()..color = skin.color.withOpacity(glassesOpacity));
+    canvas.drawCircle(const Offset(-4.0, -2.0), 3.0, Paint()..color = Colors.black);
+    canvas.restore();
+
+    canvas.drawCircle(
+      const Offset(-4.0, -2.0),
+      3.0,
+      Paint()
+        ..color = Colors.black.withOpacity(0.3 * glassesOpacity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.8,
+    );
+
+    // Right eye/glass
+    canvas.saveLayer(null, Paint()..color = skin.color.withOpacity(glassesOpacity));
+    canvas.drawCircle(const Offset(4.0, -2.0), 3.0, Paint()..color = Colors.black);
+    canvas.restore();
+
+    canvas.drawCircle(
+      const Offset(4.0, -2.0),
+      3.0,
+      Paint()
+        ..color = Colors.black.withOpacity(0.3 * glassesOpacity)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.8,
+    );
+
+    // Nose
+    canvas.drawLine(
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 3.0),
+      Paint()
+        ..color = skin.color.withOpacity(0.6)
+        ..strokeWidth = 0.6,
+    );
+
+    // Mouth
+    canvas.drawArc(
+      Rect.fromCircle(center: const Offset(0.0, 5.0), radius: 2.5),
+      0.0,
+      math.pi,
+      false,
+      Paint()
+        ..color = const Color(0xFFB89968)
+        ..strokeWidth = 0.8
+        ..style = PaintingStyle.stroke,
+    );
+
+    canvas.restore();
+
+    // Pocket hand animation (putting hand in pocket)
+    if (pocketHand > 0.1) {
+      final pocketX = 6.0 + (pocketHand * 4.0);
+      final pocketY = -50.0 + (pocketHand * 8.0);
+      canvas.drawCircle(
+        Offset(pocketX, pocketY),
+        2.0 + (pocketHand * 1.5),
+        skin,
+      );
+    }
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _RealisticCharacterPainter oldDelegate) {
+    return oldDelegate.walkPhase != walkPhase ||
+        oldDelegate.grabPhase != grabPhase ||
+        oldDelegate.glassesRemove != glassesRemove ||
+        oldDelegate.pocketHand != pocketHand ||
+        oldDelegate.faceRotation != faceRotation;
+  }
+}
+
+double _p(double value, double start, double end) {
+  if (value <= start) return 0.0;
+  if (value >= end) return 1.0;
+  return (value - start) / (end - start);
+}
+
+double _mix(double start, double end, double amount) {
+  return start + (end - start) * amount;
+}

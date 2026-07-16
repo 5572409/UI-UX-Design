@@ -1,0 +1,291 @@
+html::
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compact Liquid OTP UI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="otp-card" id="otpCard">
+        <h2>Verify OTP</h2>
+        <p class="subtitle">Enter code</p>
+        
+        <div class="otp-inputs">
+            <input type="text" maxlength="1" class="otp-field" pattern="\d*" inputmode="numeric">
+            <input type="text" maxlength="1" class="otp-field" pattern="\d*" inputmode="numeric">
+            <input type="text" maxlength="1" class="otp-field" pattern="\d*" inputmode="numeric">
+            <input type="text" maxlength="1" class="otp-field" pattern="\d*" inputmode="numeric">
+        </div>
+
+        <button class="verify-btn" id="verifyBtn">Verify Now</button>
+
+        <div class="message-container">
+            <p class="message" id="msgText"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+CSS::
+
+/* Base Styling */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    background-color: #16171d;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    transition: background-color 0.3s ease;
+}
+
+/* Shrunk/Smaller Compact Card Size */
+.otp-card {
+    background: #16171d;
+    padding: 30px 22px;
+    border-radius: 22px;
+    width: 290px; /* Thoda chota size kiya */
+    text-align: center;
+    box-shadow: 7px 7px 14px #0b0c0f, -7px -7px 14px #21222b;
+    transition: transform 0.2s ease, box-shadow 0.3s ease, border 0.3s ease;
+    position: relative;
+}
+
+h2 {
+    color: #e2e8f0;
+    font-size: 20px;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+.subtitle {
+    color: #526173;
+    font-size: 12px;
+    margin-bottom: 22px;
+}
+
+/* Inputs Container */
+.otp-inputs {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 25px;
+}
+
+/* Smaller Fields with White Liquid/Slime Simulation Background */
+.otp-field {
+    width: 50px; /* Dimensions shrunk */
+    height: 55px;
+    background: #16171d;
+    border: none;
+    outline: none;
+    border-radius: 12px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #00ffcc;
+    text-align: center;
+    box-shadow: inset 3px 3px 6px #0b0c0f, inset -3px -3px 6px #21222b;
+    position: relative;
+    /* Background clip aur smooth transition liquid wave ke liye */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- ADVANCED WHITE LIQUID HOVER EFFECT --- */
+.otp-field:hover {
+    transform: scale(1.03);
+    color: #16171d; /* Text dark ho jaye taake white liquid par saaf dikhe */
+    background: #ffffff; /* Smooth pure white liquid background shift */
+    /* Liquid splash shadow effect */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8), 
+                inset 0 0 10px rgba(255, 255, 255, 0.5),
+                0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.otp-field:focus {
+    color: #00ffcc;
+    background: #1a1d26;
+    box-shadow: inset 2px 2px 4px #0b0c0f, inset -2px -2px 4px #21222b, 0 0 12px rgba(0, 255, 204, 0.4);
+}
+
+/* Compact Button */
+.verify-btn {
+    width: 100%;
+    padding: 12px;
+    background: #16171d;
+    border: none;
+    outline: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #8a99ad;
+    cursor: pointer;
+    box-shadow: 4px 4px 8px #0b0c0f, -4px -4px 8px #21222b;
+    transition: all 0.2s ease;
+}
+
+.verify-btn:active {
+    box-shadow: inset 2px 2px 5px #0b0c0f, inset -2px -2px 5px #21222b;
+    color: #00ffcc;
+}
+
+/* Message Container */
+.message-container {
+    margin-top: 18px;
+    min-height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Short Spaced Neon Text Format */
+.message {
+    font-size: 14px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 4px; /* Har character ke baad zada space */
+}
+
+.message.success {
+    color: #10b981;
+    text-shadow: 0 0 8px #10b981, 0 0 20px #10b981;
+}
+
+.message.danger {
+    color: #ef4444;
+    text-shadow: 0 0 8px #ef4444, 0 0 20px #ef4444;
+}
+
+/* --- DANGEROUS HIGH GLITCH STATE --- */
+.dangerous-glitch {
+    animation: extremeGlitch 0.4s cubic-bezier(.36,.07,.19,.97) both;
+    border: 1.5px solid #ef4444;
+}
+
+@keyframes extremeGlitch {
+    0%, 100% { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); box-shadow: 7px 7px 14px #0b0c0f, -7px -7px 14px #21222b; }
+    15% { transform: translate3d(-4px, -2px, 0) scale(1.02) rotate(-1deg); box-shadow: 0 0 25px rgba(239, 68, 68, 0.8); }
+    45% { transform: translate3d(4px, 3px, 0) rotate(1deg); }
+    70% { transform: translate3d(-3px, 1px, 0) scale(0.98) rotate(-1deg); box-shadow: 0 0 30px rgba(239, 68, 68, 1); }
+    90% { transform: translate3d(2px, -1px, 0) scale(1.01); }
+}
+
+body.danger-alert {
+    animation: bodyFlash 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes bodyFlash {
+    0% { background-color: #16171d; }
+    100% { background-color: #24090e; }
+}
+
+.success-glow {
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.5);
+    border: 1px solid #10b981;
+}
+
+
+
+
+Script:::
+
+
+const fields = document.querySelectorAll('.otp-field');
+const verifyBtn = document.getElementById('verifyBtn');
+const card = document.getElementById('otpCard');
+const msgText = document.getElementById('msgText');
+
+// Auto-focus field shift logic
+fields.forEach((field, index) => {
+    field.addEventListener('input', (e) => {
+        field.value = field.value.replace(/[^0-9]/g, '');
+        if (field.value.length === 1 && index < fields.length - 1) {
+            fields[index + 1].focus();
+        }
+    });
+
+    field.addEventListener('keydown', (e) => {
+        if (e.key === 'Backspace' && field.value.length === 0 && index > 0) {
+            fields[index - 1].focus();
+        }
+    });
+});
+
+// Custom Neon Spaced Typewriter (Exact 2 Seconds Duration)
+function typeNeonMessage(text, className, callback) {
+    msgText.innerText = '';
+    msgText.className = `message ${className}`;
+    
+    let currentIdx = 0;
+    const speed = 2000 / text.length; // 2000ms distributed evenly
+
+    function typing() {
+        if (currentIdx < text.length) {
+            msgText.innerText += text.charAt(currentIdx);
+            currentIdx++;
+            setTimeout(typing, speed);
+        } else if (callback) {
+            setTimeout(callback, 600); 
+        }
+    }
+    typing();
+}
+
+// Verification Process
+function verifyOTP() {
+    let enteredOTP = '';
+    fields.forEach(field => enteredOTP += field.value);
+
+    // Style clean up
+    card.classList.remove('dangerous-glitch', 'success-glow');
+    document.body.classList.remove('danger-alert');
+    msgText.innerText = '';
+
+    if (enteredOTP === '1234') {
+        // --- SUCCESS STATE (Short Words + Extra Space Format) ---
+        card.classList.add('success-glow');
+        
+        // Short text with internal spacing
+        typeNeonMessage("OK  PASS", "success", () => {
+            fields.forEach(field => field.value = ''); // Clear numbers
+            fields[0].focus();
+        });
+
+    } else {
+        // --- DANGEROUS GLITCH STATE (Short Spaced) ---
+        document.body.classList.add('danger-alert');
+        void card.offsetWidth; 
+        card.classList.add('dangerous-glitch');
+
+        // Short dangerous text with spacing
+        typeNeonMessage("WRONG  CODE", "danger", () => {
+            document.body.classList.remove('danger-alert');
+        });
+
+        if (navigator.vibrate) {
+            navigator.vibrate([100, 50, 100, 50, 200]); 
+        }
+    }
+}
+
+// Button and key interactions
+verifyBtn.addEventListener('click', verifyOTP);
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        verifyOTP();
+    }
+});

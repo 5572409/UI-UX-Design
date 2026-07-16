@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ur">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Minimal Checkbox Showcase</title>
+    <style>
+        /* Base Reset & Elegant Font */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap');
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: #0b0f19; /* Dark Slate Background */
+            color: #f1f5f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        /* Compact Single Card Design (Width Halved) */
+        .compact-card {
+            background: #151f32;
+            border: 1px solid #24354f;
+            border-radius: 12px;
+            padding: 12px 16px;
+            width: 100%;
+            max-width: 260px; /* Width strictly halved from 520px to 260px */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Row Layout */
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        /* Title Style */
+        .title {
+            font-size: 11px;
+            font-weight: 500;
+            color: #94a3b8;
+            flex: 1;
+        }
+
+        /* Checkboxes Container (Group of 3 options side by side) */
+        .group {
+            display: flex;
+            gap: 8px; /* Slightly tighter gap for smaller width */
+        }
+
+        /* Helper label style for alignment */
+        .item {
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        /* -------------------------------------------
+           1. Default Browser (Size Reduced)
+        ------------------------------------------- */
+        .cb-default {
+            width: 13px;
+            height: 13px;
+            cursor: pointer;
+        }
+
+        /* -------------------------------------------
+           2. iOS Toggle Switch (Compact Size)
+        ------------------------------------------- */
+        .ios-toggle {
+            position: relative;
+        }
+
+        .ios-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            position: absolute;
+        }
+
+        .ios-slider {
+            position: relative;
+            display: inline-block;
+            width: 30px;
+            height: 16px;
+            background-color: #475569;
+            border-radius: 20px;
+            transition: 0.2s ease;
+        }
+
+        .ios-slider:before {
+            position: absolute;
+            content: "";
+            height: 12px;
+            width: 12px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            border-radius: 50%;
+            transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .ios-toggle input:checked + .ios-slider {
+            background-color: #10b981;
+        }
+
+        .ios-toggle input:checked + .ios-slider:before {
+            transform: translateX(14px);
+        }
+
+        /* -------------------------------------------
+           3. Custom SVG Tick Box (Compact Size)
+        ------------------------------------------- */
+        .custom-tick input {
+            display: none;
+        }
+
+        .tick-box {
+            width: 15px;
+            height: 15px;
+            border: 1.5px solid #64748b;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .tick-box svg {
+            width: 9px;
+            height: 9px;
+            fill: none;
+            stroke: white;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 20;
+            stroke-dashoffset: 20;
+            transition: stroke-dashoffset 0.2s ease-out;
+        }
+
+        .custom-tick input:checked + .tick-box {
+            background-color: #6366f1;
+            border-color: #6366f1;
+        }
+
+        .custom-tick input:checked + .tick-box svg {
+            stroke-dashoffset: 0;
+        }
+
+        /* -------------------------------------------
+           4. Button/Filter Chip (Micro Chips)
+        ------------------------------------------- */
+        .chip-checkbox input {
+            display: none;
+        }
+
+        .chip-label {
+            padding: 3px 6px;
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            border-radius: 12px;
+            font-size: 9px;
+            font-weight: 500;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .chip-checkbox input:checked + .chip-label {
+            background-color: rgba(236, 72, 153, 0.1);
+            border-color: #ec4899;
+            color: #f472b6;
+        }
+
+        /* -------------------------------------------
+           5. JS Liquid Splash Checkbox (Compact Size)
+        ------------------------------------------- */
+        .animated-splash input {
+            display: none;
+        }
+
+        .splash-box {
+            position: relative;
+            width: 15px;
+            height: 15px;
+            border: 1.5px solid #64748b;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+
+        .splash-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 15px;
+            height: 15px;
+            border: 1.5px solid #e11d48;
+            border-radius: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(1.8);
+                opacity: 0;
+            }
+        }
+
+        .animated-splash input:checked + .splash-box {
+            border-color: #e11d48;
+            animation: bounce 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+        }
+
+        .animated-splash input:checked + .splash-box::after {
+            content: "";
+            width: 7px;
+            height: 7px;
+            background-color: #e11d48;
+            border-radius: 50%;
+            display: block;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        .ripple-active {
+            animation: ripple 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="compact-card">
+
+        <!-- 1. Default -->
+        <div class="row">
+            <span class="title">1. Default</span>
+            <div class="group">
+                <label class="item"><input type="checkbox" class="cb-default"></label>
+                <label class="item"><input type="checkbox" class="cb-default" checked></label>
+                <label class="item"><input type="checkbox" class="cb-default"></label>
+            </div>
+        </div>
+
+        <!-- 2. iOS Toggle -->
+        <div class="row">
+            <span class="title">2. iOS Switch</span>
+            <div class="group">
+                <label class="item ios-toggle">
+                    <input type="checkbox">
+                    <span class="ios-slider"></span>
+                </label>
+                <label class="item ios-toggle">
+                    <input type="checkbox" checked>
+                    <span class="ios-slider"></span>
+                </label>
+                <label class="item ios-toggle">
+                    <input type="checkbox">
+                    <span class="ios-slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 3. Custom SVG Tick -->
+        <div class="row">
+            <span class="title">3. SVG Tick</span>
+            <div class="group">
+                <label class="item custom-tick">
+                    <input type="checkbox">
+                    <span class="tick-box">
+                        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
+                </label>
+                <label class="item custom-tick">
+                    <input type="checkbox" checked>
+                    <span class="tick-box">
+                        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
+                </label>
+                <label class="item custom-tick">
+                    <input type="checkbox">
+                    <span class="tick-box">
+                        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 4. Filter Chip -->
+        <div class="row">
+            <span class="title">4. Chip Style</span>
+            <div class="group">
+                <label class="item chip-checkbox">
+                    <input type="checkbox">
+                    <span class="chip-label">C1</span>
+                </label>
+                <label class="item chip-checkbox">
+                    <input type="checkbox" checked>
+                    <span class="chip-label">C2</span>
+                </label>
+                <label class="item chip-checkbox">
+                    <input type="checkbox">
+                    <span class="chip-label">C3</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- 5. Splash Checkbox -->
+        <div class="row">
+            <span class="title">5. Fluid JS</span>
+            <div class="group">
+                <label class="item animated-splash">
+                    <input type="checkbox" class="splash-input">
+                    <span class="splash-box"><span class="splash-ring"></span></span>
+                </label>
+                <label class="item animated-splash">
+                    <input type="checkbox" class="splash-input" checked>
+                    <span class="splash-box"><span class="splash-ring"></span></span>
+                </label>
+                <label class="item animated-splash">
+                    <input type="checkbox" class="splash-input">
+                    <span class="splash-box"><span class="splash-ring"></span></span>
+                </label>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const splashInputs = document.querySelectorAll('.splash-input');
+
+        splashInputs.forEach(input => {
+            input.addEventListener('change', (event) => {
+                if (event.target.checked) {
+                    const ring = event.target.nextElementSibling.querySelector('.splash-ring');
+                    if (ring) {
+                        ring.classList.remove('ripple-active');
+                        void ring.offsetWidth; 
+                        ring.classList.add('ripple-active');
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

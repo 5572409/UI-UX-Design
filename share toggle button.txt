@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soft Floating Liquid Share Button</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #0b0f19; /* Soft dark background */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Container setup */
+        .share-container {
+            position: relative;
+            width: 260px;
+            height: 260px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Social wrapper */
+        .social-circle {
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        /* --- Individual Social Buttons with Ultra Soft Liquid Effect --- */
+        .social-item {
+            position: absolute;
+            width: 68px;
+            height: 68px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            cursor: pointer;
+            pointer-events: auto;
+            opacity: 0;
+            z-index: 5;
+            
+            /* Ultra-soft continuous morphing */
+            animation: superSoftMorph 6s ease-in-out infinite;
+            transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1); /* Custom slow ease-out curve */
+        }
+
+        /* 
+           Floating Icons: 
+           Ab ye icons liquid ke sath softly sway (tairenge) aur halke se rotate honge
+        */
+        .social-item i {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            color: #fff;
+            font-size: 22px;
+            /* Floating animation taake icon pani par tairta hua lage */
+            animation: iconFloat 5s ease-in-out infinite;
+            transition: transform 0.4s ease;
+        }
+
+        /* Brand Liquid Gradients with Soft Glows */
+        .social-item.instagram {
+            background: linear-gradient(135deg, #ff007f, #7f00ff, #ffaa00);
+            background-size: 180% 180%;
+            animation-delay: 0.3s;
+            filter: drop-shadow(0 8px 15px rgba(255, 0, 127, 0.25));
+        }
+        .social-item.instagram i {
+            animation-delay: 0.1s;
+        }
+
+        .social-item.twitter {
+            background: linear-gradient(135deg, #1DA1F2, #00ffcc);
+            background-size: 180% 180%;
+            animation-delay: 0.6s;
+            filter: drop-shadow(0 8px 15px rgba(29, 161, 242, 0.25));
+        }
+        .social-item.twitter i {
+            animation-delay: 0.3s;
+        }
+
+        .social-item.github {
+            background: linear-gradient(135deg, #24292e, #555d66, #111);
+            background-size: 180% 180%;
+            animation-delay: 0.9s;
+            filter: drop-shadow(0 8px 15px rgba(0, 0, 0, 0.4));
+        }
+        .social-item.github i {
+            animation-delay: 0.5s;
+        }
+
+        .social-item.discord {
+            background: linear-gradient(135deg, #5865F2, #854eff);
+            background-size: 180% 180%;
+            animation-delay: 1.2s;
+            filter: drop-shadow(0 8px 15px rgba(88, 101, 242, 0.25));
+        }
+        .social-item.discord i {
+            animation-delay: 0.7s;
+        }
+
+        /* Hover scale up */
+        .social-item:hover {
+            transform: scale(1.18) !important;
+            filter: brightness(1.1) saturate(1.1);
+        }
+
+        /* --- Closed State positions (Hidden at center) --- */
+        .social-item.instagram,
+        .social-item.twitter,
+        .social-item.github,
+        .social-item.discord {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+        }
+
+        /* --- Active State (Chaar taraf phailenge with soft timing) --- */
+        .share-container.active .social-item {
+            opacity: 1;
+        }
+
+        /* Top-Left */
+        .share-container.active .social-item.instagram {
+            top: 10%;
+            left: 10%;
+            transform: translate(0, 0) scale(1);
+        }
+        /* Top-Right */
+        .share-container.active .social-item.twitter {
+            top: 10%;
+            left: 65%;
+            transform: translate(0, 0) scale(1);
+        }
+        /* Bottom-Left */
+        .share-container.active .social-item.github {
+            top: 65%;
+            left: 10%;
+            transform: translate(0, 0) scale(1);
+        }
+        /* Bottom-Right */
+        .share-container.active .social-item.discord {
+            top: 65%;
+            left: 65%;
+            transform: translate(0, 0) scale(1);
+        }
+
+
+        /* --- MAIN CENTER TOGGLE BUTTON --- */
+        .toggle-btn {
+            position: absolute;
+            width: 74px;
+            height: 74px;
+            background: linear-gradient(135deg, #00f0ff, #7f00ff, #ff007f);
+            background-size: 200% 200%;
+            cursor: pointer;
+            filter: drop-shadow(0 10px 25px rgba(127, 0, 255, 0.45));
+            z-index: 10;
+            
+            /* Soft Jelly Morphing & Gradient Movement */
+            animation: 
+                superSoftMorph 5s ease-in-out infinite,
+                colorShift 8s ease infinite alternate;
+                
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toggle-btn:hover {
+            transform: scale(1.08);
+        }
+
+        /* Floating Center Share Icon */
+        .toggle-btn i {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 22px;
+            color: #fff;
+            pointer-events: none;
+            /* Center icon float behavior */
+            animation: iconFloat 4.5s ease-in-out infinite;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Active Close (Rotation with center float preserved) */
+        .share-container.active .toggle-btn i {
+            animation: none; /* Active hone par smooth transition ke liye float temporary pause */
+            transform: translate(-50%, -50%) rotate(135deg) scale(1.1);
+        }
+
+
+        /* --- ANIMATIONS (Extra Smooth & Soft Curves) --- */
+
+        /* 
+           1. Ultra-Soft Jelly/Water Morphing:
+           Isme border-radius ke corners bohot soft curves (from 35% to 75%) par smooth rotate hote hain
+        */
+        @keyframes superSoftMorph {
+            0% {
+                border-radius: 50% 50% 45% 55% / 45% 55% 45% 55%;
+                transform: rotate(0deg);
+            }
+            33% {
+                border-radius: 55% 45% 55% 45% / 55% 40% 60% 45%;
+                transform: rotate(120deg);
+            }
+            66% {
+                border-radius: 45% 55% 40% 60% / 40% 60% 40% 60%;
+                transform: rotate(240deg);
+            }
+            100% {
+                border-radius: 50% 50% 45% 55% / 45% 55% 45% 55%;
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 
+           2. Liquid Floating Effect for Icons:
+           Yeh icons ko morphing ke dauran soft wave ki tarah softly move aur tilt karwata hai
+        */
+        @keyframes iconFloat {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg) translateY(0px);
+            }
+            25% {
+                transform: translate(-50%, -50%) rotate(3deg) translateY(-2px) translateX(1px);
+            }
+            50% {
+                transform: translate(-50%, -50%) rotate(-3deg) translateY(2px) translateX(-1px);
+            }
+            75% {
+                transform: translate(-50%, -50%) rotate(2deg) translateY(-1px) translateX(2px);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(0deg) translateY(0px);
+            }
+        }
+
+        /* 3. Gradient Color Flow */
+        @keyframes colorShift {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="share-container" id="shareMenu">
+        <!-- Social items (With Soft Liquid Morphing & Swaying Floating Icons) -->
+        <div class="social-circle">
+            <a href="#" class="social-item instagram" title="Instagram">
+                <i class="fab fa-instagram"></i>
+            </a>
+            <a href="#" class="social-item twitter" title="Twitter">
+                <i class="fab fa-twitter"></i>
+            </a>
+            <a href="#" class="social-item github" title="GitHub">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="#" class="social-item discord" title="Discord">
+                <i class="fab fa-discord"></i>
+            </a>
+        </div>
+
+        <!-- Center Ultra-Soft Liquid Toggle Button -->
+        <div class="toggle-btn" id="toggleBtn">
+            <i class="fas fa-share-alt"></i>
+        </div>
+    </div>
+
+    <script>
+        const shareContainer = document.getElementById('shareMenu');
+        const toggleBtn = document.getElementById('toggleBtn');
+
+        // Toggle Active Class on Click
+        toggleBtn.addEventListener('click', () => {
+            shareContainer.classList.toggle('active');
+        });
+
+        // Close menu if clicked outside
+        document.addEventListener('click', (e) => {
+            if (!shareContainer.contains(e.target)) {
+                shareContainer.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

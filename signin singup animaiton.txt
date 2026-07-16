@@ -1,0 +1,1096 @@
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const AuthAnimationApp());
+}
+
+class AuthAnimationApp extends StatelessWidget {
+  const AuthAnimationApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: AuthAnimationPage(),
+    );
+  }
+}
+
+class AuthAnimationPage extends StatefulWidget {
+  const AuthAnimationPage({super.key});
+
+  @override
+  State<AuthAnimationPage> createState() => _AuthAnimationPageState();
+}
+
+class _AuthAnimationPageState extends State<AuthAnimationPage>
+    with TickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final AnimationController _clickController;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    );
+    _clickController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+  }
+
+  void _openSignup() {
+    if (_controller.value == 1 || _controller.isAnimating) return;
+    _clickController.forward().then((_) {
+      _clickController.reset();
+    });
+    _controller.forward();
+  }
+
+  void _openSignin() {
+    if (_controller.value == 0 || _controller.isAnimating) return;
+    _clickController.forward().then((_) {
+      _clickController.reset();
+    });
+    _controller.reverse();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _clickController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: MouseRegion(
+        cursor: SystemMouseCursors.basic,
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFF0A0E27),
+                Color(0xFF0F1A3A),
+                Color(0xFF06081A),
+              ],
+            ),
+          ),
+          child: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final isWebSize = constraints.maxWidth >= 720;
+                final maxCardWidth = isWebSize ? 760.0 : 390.0;
+                final sidePadding = constraints.maxWidth < 420 ? 16.0 : 28.0;
+                final cardWidth = math.min(
+                  constraints.maxWidth - (sidePadding * 2),
+                  maxCardWidth,
+                );
+
+                return Center(
+                  child: SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: sidePadding,
+                      vertical: 24,
+                    ),
+                    child: Stack(
+                      children: [
+                        AnimatedBuilder(
+                          animation: _clickController,
+                          builder: (context, _) {
+                            return Container(
+                              width: cardWidth,
+                              height: cardWidth / 1.9,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Color.lerp(
+                                      const Color(0xFF00D9FF).withOpacity(0.0),
+                                      const Color(0xFF00D9FF).withOpacity(0.6),
+                                      _clickController.value,
+                                    )!,
+                                    blurRadius: 60 + (_clickController.value * 40),
+                                    spreadRadius: 10 + (_clickController.value * 15),
+                                  ),
+                                  BoxShadow(
+                                    color: Color.lerp(
+                                      const Color(0xFF7C3AED).withOpacity(0.0),
+                                      const Color(0xFF7C3AED).withOpacity(0.4),
+                                      _clickController.value,
+                                    )!,
+                                    blurRadius: 50 + (_clickController.value * 30),
+                                    spreadRadius: 5 + (_clickController.value * 12),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                        AuthAnimationCard(
+                          controller: _controller,
+                          clickController: _clickController,
+                          width: cardWidth,
+                          onSignupTap: _openSignup,
+                          onSigninTap: _openSignin,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AuthAnimationCard extends StatefulWidget {
+  const AuthAnimationCard({
+    super.key,
+    required this.controller,
+    required this.clickController,
+    required this.width,
+    required this.onSignupTap,
+    required this.onSigninTap,
+  });
+
+  final Animation<double> controller;
+  final Animation<double> clickController;
+  final double width;
+  final VoidCallback onSignupTap;
+  final VoidCallback onSigninTap;
+
+  @override
+  State<AuthAnimationCard> createState() => _AuthAnimationCardState();
+}
+
+class _AuthAnimationCardState extends State<AuthAnimationCard> {
+  late TextEditingController _loginUsernameController;
+  late TextEditingController _loginPasswordController;
+  late TextEditingController _signupUsernameController;
+  late TextEditingController _signupEmailController;
+  late TextEditingController _signupPasswordController;
+
+  @override
+  void initState() {
+    super.initState();
+    _loginUsernameController = TextEditingController();
+    _loginPasswordController = TextEditingController();
+    _signupUsernameController = TextEditingController();
+    _signupEmailController = TextEditingController();
+    _signupPasswordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _loginUsernameController.dispose();
+    _loginPasswordController.dispose();
+    _signupUsernameController.dispose();
+    _signupEmailController.dispose();
+    _signupPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: widget.controller,
+      builder: (context, _) {
+        final progress =
+        Curves.easeInOutCubic.transform(widget.controller.value);
+        final motion = _AuthMotion.from(progress);
+
+        return MouseRegion(
+          cursor: SystemMouseCursors.basic,
+          child: SizedBox(
+            width: widget.width,
+            child: AspectRatio(
+              aspectRatio: 1.9,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF00D9FF).withOpacity(0.3),
+                      blurRadius: widget.width > 500 ? 50 : 34,
+                      spreadRadius: -2,
+                    ),
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.7),
+                      blurRadius: widget.width > 500 ? 60 : 40,
+                      offset: Offset(0, widget.width > 500 ? 35 : 25),
+                    ),
+                  ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LayoutBuilder(
+                    builder: (context, card) {
+                      final w = card.maxWidth;
+                      final h = card.maxHeight;
+                      final unit = (w / 390).clamp(0.62, 1.72).toDouble();
+
+                      return Stack(
+                        children: [
+                          Positioned.fill(
+                            child: CustomPaint(
+                              painter: _AuthPanelPainter(
+                                side: motion.side,
+                                sweep: motion.sweep,
+                                shift: widget.controller.value,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: w * 0.055,
+                            top: h * 0.13,
+                            width: w * 0.38,
+                            height: h * 0.76,
+                            child: _FadeSlide(
+                              opacity: motion.loginOpacity,
+                              dx: -18 * unit,
+                              child: _AuthForm(
+                                title: 'Welcome Back',
+                                buttonText: 'Sign In',
+                                usernameController: _loginUsernameController,
+                                passwordController: _loginPasswordController,
+                                fields: const [
+                                  _FieldData('Email', Icons.mail_outline),
+                                  _FieldData('Password', Icons.lock_outline),
+                                ],
+                                footerTop: "New here?",
+                                footerAction: 'Create Account',
+                                unit: unit,
+                                onFooterTap: widget.onSignupTap,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: w * 0.07,
+                            top: h * 0.25,
+                            width: w * 0.30,
+                            child: _FadeSlide(
+                              opacity: motion.loginOpacity,
+                              dx: 18 * unit,
+                              child: _WelcomeCopy(
+                                title: 'WELCOME\nBACK!',
+                                body:
+                                'Access your digital\nworld and unlock new\npossibilities with us.',
+                                align: TextAlign.center,
+                                unit: unit,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            left: w * 0.055,
+                            top: h * 0.30,
+                            width: w * 0.34,
+                            child: _FadeSlide(
+                              opacity: motion.registerOpacity,
+                              dx: -18 * unit,
+                              child: _WelcomeCopy(
+                                title: 'JOIN US!',
+                                body:
+                                "Step into the future!\nWe're excited to have\nyou join our community.",
+                                align: TextAlign.left,
+                                unit: unit,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            right: w * 0.055,
+                            top: h * 0.06,
+                            width: w * 0.39,
+                            height: h * 0.90,
+                            child: _FadeSlide(
+                              opacity: motion.registerOpacity,
+                              dx: 18 * unit,
+                              child: _AuthForm(
+                                title: 'Create Account',
+                                buttonText: 'Sign Up',
+                                usernameController: _signupUsernameController,
+                                passwordController: _signupPasswordController,
+                                emailController: _signupEmailController,
+                                fields: const [
+                                  _FieldData('Full Name', Icons.person_outline),
+                                  _FieldData('Email', Icons.mail_outline),
+                                  _FieldData('Password', Icons.lock_outline),
+                                ],
+                                footerTop: 'Already a member?',
+                                footerAction: 'Sign In',
+                                unit: unit,
+                                onFooterTap: widget.onSigninTap,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _AuthMotion {
+  const _AuthMotion({
+    required this.side,
+    required this.loginOpacity,
+    required this.registerOpacity,
+    required this.sweep,
+  });
+
+  final double side;
+  final double loginOpacity;
+  final double registerOpacity;
+  final double sweep;
+
+  static _AuthMotion from(double t) {
+    return _AuthMotion(
+      side: _lerp(-1, 1, t),
+      loginOpacity: 1 - _ease(_range(t, 0.00, 0.36)),
+      registerOpacity: _ease(_range(t, 0.64, 1.00)),
+      sweep: math.sin(t * math.pi),
+    );
+  }
+}
+
+class _AuthPanelPainter extends CustomPainter {
+  const _AuthPanelPainter({
+    required this.side,
+    required this.sweep,
+    required this.shift,
+  });
+
+  final double side;
+  final double sweep;
+  final double shift;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+
+    // Enhanced gradient for 8K - richer colors
+    final gradientPaint = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Color(0xFF1A2856),
+          Color(0xFF2E3B7F),
+          Color(0xFF3D51B5),
+          Color(0xFF1E2847),
+        ],
+        stops: [0.0, 0.38, 0.68, 1.0],
+      ).createShader(rect);
+    canvas.drawRect(rect, gradientPaint);
+
+    _drawTexture(canvas, size);
+    _drawDarkShape(canvas, size);
+    _drawSweep(canvas, size);
+    _drawBorder(canvas, size);
+
+    // Extra glow layer for 8K
+    _drawGlow(canvas, size);
+  }
+
+  void _drawTexture(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final linePaint = Paint()
+      ..color = Colors.white.withOpacity(0.06)
+      ..strokeWidth = 0.8;
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.15)
+      ..strokeWidth = 1.5;
+
+    final drift = shift * 34;
+    for (double x = -h; x < w + h; x += 18) {
+      final start = Offset(x + drift, 0);
+      final end = Offset(x - h * 0.45 + drift, h);
+      canvas.drawLine(start.translate(8, 0), end.translate(8, 0), shadowPaint);
+      canvas.drawLine(start, end, linePaint);
+    }
+
+    final shade = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          Colors.white.withOpacity(0.08),
+          Colors.transparent,
+          Colors.black.withOpacity(0.2),
+        ],
+      ).createShader(Offset.zero & size);
+    canvas.drawRect(Offset.zero & size, shade);
+  }
+
+  void _drawDarkShape(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final u = ((side + 1) / 2).clamp(0.0, 1.0).toDouble();
+
+    final p0 = Offset(_lerp(0, w * 0.55, u), 0);
+    final p1 = Offset(_lerp(w * 0.48, w, u), 0);
+    final p2 = Offset(_lerp(w * 0.74, w, u), h);
+    final p3 = Offset(_lerp(0, w * 0.28, u), h);
+
+    final path = Path()
+      ..moveTo(p0.dx, p0.dy)
+      ..lineTo(p1.dx, p1.dy)
+      ..lineTo(p2.dx, p2.dy)
+      ..lineTo(p3.dx, p3.dy)
+      ..close();
+
+    canvas.drawShadow(path, Colors.black.withOpacity(0.8), 20, true);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF0F1829),
+            Color(0xFF1A2856),
+            Color(0xFF0A0F1F),
+          ],
+        ).createShader(Offset.zero & size),
+    );
+
+    // Enhanced edge glow for 8K
+    final edgeTop = Offset(_lerp(w * 0.48, w * 0.55, u), 0);
+    final edgeBottom = Offset(_lerp(w * 0.74, w * 0.28, u), h);
+
+    canvas.drawLine(
+      edgeTop,
+      edgeBottom,
+      Paint()
+        ..color = const Color(0xFF00D9FF).withOpacity(0.9)
+        ..strokeWidth = 8
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12),
+    );
+    canvas.drawLine(
+      edgeTop,
+      edgeBottom,
+      Paint()
+        ..color = const Color(0xFF00E5FF)
+        ..strokeWidth = 2,
+    );
+  }
+
+  void _drawSweep(Canvas canvas, Size size) {
+    if (sweep <= 0.01) return;
+
+    final w = size.width;
+    final h = size.height;
+    final x = _lerp(-w * 0.35, w * 1.25, shift);
+
+    final sweepPath = Path()
+      ..moveTo(x - w * 0.28, 0)
+      ..lineTo(x + w * 0.18, 0)
+      ..lineTo(x - w * 0.28, h)
+      ..lineTo(x - w * 0.74, h)
+      ..close();
+
+    canvas.drawPath(
+      sweepPath,
+      Paint()
+        ..color = const Color(0xFF00D9FF).withOpacity(0.25 * sweep)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 24),
+    );
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = const Color(0xFF00D9FF).withOpacity(0.08 * sweep),
+    );
+  }
+
+  void _drawBorder(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final rrect = RRect.fromRectAndRadius(
+      rect.deflate(2),
+      const Radius.circular(8),
+    );
+
+    canvas.drawRRect(
+      rrect,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 10
+        ..color = const Color(0xFF00D9FF).withOpacity(0.2)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 15),
+    );
+    canvas.drawRRect(
+      rrect,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..color = const Color(0xFF00D9FF).withOpacity(0.7),
+    );
+    canvas.drawRRect(
+      rrect.deflate(4),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1
+        ..color = Colors.white.withOpacity(0.2),
+    );
+  }
+
+  void _drawGlow(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+    final gradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        const Color(0xFF00D9FF).withOpacity(0.03),
+        Colors.transparent,
+        const Color(0xFF7C3AED).withOpacity(0.03),
+      ],
+    );
+    canvas.drawRect(rect, Paint()..shader = gradient.createShader(rect));
+  }
+
+  @override
+  bool shouldRepaint(covariant _AuthPanelPainter oldDelegate) {
+    return oldDelegate.side != side ||
+        oldDelegate.sweep != sweep ||
+        oldDelegate.shift != shift;
+  }
+}
+
+class _FadeSlide extends StatelessWidget {
+  const _FadeSlide({
+    required this.opacity,
+    required this.dx,
+    required this.child,
+  });
+
+  final double opacity;
+  final double dx;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final visible = opacity.clamp(0.0, 1.0).toDouble();
+
+    return IgnorePointer(
+      ignoring: visible < 0.2,
+      child: Opacity(
+        opacity: visible,
+        child: Transform.translate(
+          offset: Offset(dx * (1 - visible), 0),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class _AuthForm extends StatelessWidget {
+  const _AuthForm({
+    required this.title,
+    required this.buttonText,
+    required this.fields,
+    required this.footerTop,
+    required this.footerAction,
+    required this.unit,
+    required this.onFooterTap,
+    required this.usernameController,
+    required this.passwordController,
+    this.emailController,
+  });
+
+  final String title;
+  final String buttonText;
+  final List<_FieldData> fields;
+  final String footerTop;
+  final String footerAction;
+  final double unit;
+  final VoidCallback onFooterTap;
+  final TextEditingController usernameController;
+  final TextEditingController passwordController;
+  final TextEditingController? emailController;
+
+  @override
+  Widget build(BuildContext context) {
+    final compact = fields.length > 2;
+    final titleGap = compact ? 8 * unit : 12 * unit;
+    final fieldGap = compact ? 5 * unit : 8 * unit;
+
+    final controllers = fields.length == 2
+        ? [usernameController, passwordController]
+        : [usernameController, emailController!, passwordController];
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: (compact ? 16 : 17) * unit,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.0,
+                        shadows: const [
+                          Shadow(
+                            color: Colors.black54,
+                            blurRadius: 8,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: titleGap),
+                    for (int i = 0; i < fields.length; i++) ...[
+                      _InputLine(
+                        data: fields[i],
+                        unit: unit,
+                        controller: controllers[i],
+                      ),
+                      SizedBox(height: fieldGap),
+                    ],
+                    SizedBox(height: 4 * unit),
+                    _GradientButton(text: buttonText, unit: unit),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(height: 8 * unit),
+                    Text(
+                      footerTop,
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.85),
+                        fontSize: 7 * unit,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    SizedBox(height: 2 * unit),
+                    _FooterLink(
+                      text: footerAction,
+                      unit: unit,
+                      onTap: onFooterTap,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _InputLine extends StatefulWidget {
+  const _InputLine({
+    required this.data,
+    required this.unit,
+    required this.controller,
+  });
+
+  final _FieldData data;
+  final double unit;
+  final TextEditingController controller;
+
+  @override
+  State<_InputLine> createState() => _InputLineState();
+}
+
+class _InputLineState extends State<_InputLine> {
+  late FocusNode _focusNode;
+  bool _isFocused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _focusNode.addListener(() {
+      setState(() {
+        _isFocused = _focusNode.hasFocus;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.text,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(
+                widget.data.icon,
+                color: Color.lerp(
+                  Colors.white.withOpacity(0.60),
+                  const Color(0xFF00D9FF),
+                  _isFocused ? 1.0 : 0.0,
+                )!,
+                size: 14 * widget.unit,
+              ),
+              SizedBox(width: 8 * widget.unit),
+              Expanded(
+                child: TextField(
+                  controller: widget.controller,
+                  focusNode: _focusNode,
+                  obscureText: widget.data.label.contains('Password'),
+                  textAlignVertical: TextAlignVertical.center,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.95),
+                    fontSize: 8 * widget.unit,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    isCollapsed: true,
+                    hintText: widget.data.label,
+                    hintStyle: TextStyle(
+                      color: Colors.white.withOpacity(0.40),
+                      fontSize: 8 * widget.unit,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6 * widget.unit),
+          Container(
+            height: math.max(1.0, 1.6 * widget.unit),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.lerp(
+                    Colors.white.withOpacity(0.50),
+                    const Color(0xFF00D9FF),
+                    _isFocused ? 1.0 : 0.0,
+                  )!,
+                  Color.lerp(
+                    Colors.white.withOpacity(0.30),
+                    const Color(0xFF7C3AED),
+                    _isFocused ? 1.0 : 0.0,
+                  )!,
+                  Color.lerp(
+                    const Color(0xFF0099FF).withOpacity(0.40),
+                    const Color(0xFF00D9FF).withOpacity(0.80),
+                    _isFocused ? 1.0 : 0.0,
+                  )!,
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GradientButton extends StatefulWidget {
+  const _GradientButton({
+    required this.text,
+    required this.unit,
+  });
+
+  final String text;
+  final double unit;
+
+  @override
+  State<_GradientButton> createState() => _GradientButtonState();
+}
+
+class _GradientButtonState extends State<_GradientButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _pressController;
+  bool _isPressed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _pressController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+  }
+
+  @override
+  void dispose() {
+    _pressController.dispose();
+    super.dispose();
+  }
+
+  void _onPressed() {
+    setState(() => _isPressed = true);
+    _pressController.forward().then((_) {
+      _pressController.reverse();
+      setState(() => _isPressed = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _pressController,
+      builder: (context, _) {
+        final pressValue = _pressController.value;
+
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: _onPressed,
+            child: Container(
+              height: 25 * widget.unit,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Color.lerp(
+                      const Color(0xFF5EB3FF),
+                      const Color(0xFF00D9FF),
+                      pressValue,
+                    )!,
+                    Color.lerp(
+                      const Color(0xFF3D51B5),
+                      const Color(0xFF00D9FF).withOpacity(0.8),
+                      pressValue,
+                    )!,
+                    Color.lerp(
+                      const Color(0xFF2E3B7F),
+                      const Color(0xFF7C3AED),
+                      pressValue,
+                    )!,
+                  ],
+                ),
+                border: Border.all(
+                  color: Colors.white.withOpacity(
+                    0.25 + (pressValue * 0.35),
+                  ),
+                  width: 1.2,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00D9FF).withOpacity(
+                      0.40 + (pressValue * 0.45),
+                    ),
+                    blurRadius: 15 * widget.unit + (pressValue * 20),
+                    offset: Offset(0, 5 * widget.unit - (pressValue * 3)),
+                  ),
+                  BoxShadow(
+                    color: const Color(0xFF7C3AED).withOpacity(
+                      0.25 + (pressValue * 0.35),
+                    ),
+                    blurRadius: 20 + (pressValue * 15),
+                    spreadRadius: pressValue * 8,
+                  ),
+                ],
+              ),
+              child: Text(
+                widget.text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 8.5 * widget.unit,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.0,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _FooterLink extends StatefulWidget {
+  const _FooterLink({
+    required this.text,
+    required this.unit,
+    required this.onTap,
+  });
+
+  final String text;
+  final double unit;
+  final VoidCallback onTap;
+
+  @override
+  State<_FooterLink> createState() => _FooterLinkState();
+}
+
+class _FooterLinkState extends State<_FooterLink> {
+  bool _isHovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onTap,
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 3 * widget.unit),
+          child: AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 300),
+            style: TextStyle(
+              color: Color.lerp(
+                const Color(0xFF00D9FF),
+                const Color(0xFF7C3AED),
+                _isHovered ? 1.0 : 0.0,
+              )!,
+              fontSize: 8 * widget.unit,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Text(
+              widget.text,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _WelcomeCopy extends StatelessWidget {
+  const _WelcomeCopy({
+    required this.title,
+    required this.body,
+    required this.align,
+    required this.unit,
+  });
+
+  final String title;
+  final String body;
+  final TextAlign align;
+  final double unit;
+
+  @override
+  Widget build(BuildContext context) {
+    final crossAxis = align == TextAlign.left
+        ? CrossAxisAlignment.start
+        : CrossAxisAlignment.center;
+
+    return Column(
+      crossAxisAlignment: crossAxis,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          title,
+          textAlign: align,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 22 * unit,
+            height: 0.95,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.0,
+            shadows: const [
+              Shadow(
+                color: Colors.black45,
+                blurRadius: 8,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 10 * unit),
+        Text(
+          body,
+          textAlign: align,
+          style: TextStyle(
+            color: Colors.white.withOpacity(0.85),
+            fontSize: 9 * unit,
+            height: 1.2,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+            shadows: [
+              Shadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _FieldData {
+  const _FieldData(this.label, this.icon);
+
+  final String label;
+  final IconData icon;
+}
+
+double _range(double value, double start, double end) {
+  return ((value - start) / (end - start)).clamp(0.0, 1.0).toDouble();
+}
+
+double _ease(double value) {
+  return Curves.easeInOutCubic.transform(value.clamp(0.0, 1.0).toDouble());
+}
+
+double _lerp(double a, double b, double t) {
+  return a + (b - a) * t;
+}

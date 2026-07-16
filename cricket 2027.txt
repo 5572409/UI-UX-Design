@@ -1,0 +1,1162 @@
+import 'package:flutter/material.dart';
+import 'dart:math';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Cricket World Cup 2027',
+      theme: ThemeData.dark().copyWith(
+        primaryColor: const Color(0xFF00FF00),
+        useMaterial3: true,
+        scaffoldBackgroundColor: Colors.black,
+      ),
+      home: const LoginScreen(),
+      debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+// ============ LOGIN SCREEN ============
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _screenAnimationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  late AnimationController _ballController;
+  late Animation<double> _ballRotation;
+  late Animation<Offset> _ballPosition;
+  late Animation<double> _ballScale;
+
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isButtonAnimating = false;
+  bool _obscurePassword = true;
+  bool _isBallMoving = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _screenAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 1200),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _screenAnimationController, curve: Curves.easeIn),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+          parent: _screenAnimationController, curve: Curves.easeOut),
+    );
+
+    _screenAnimationController.forward();
+
+    _ballController = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+
+    _ballRotation = Tween<double>(begin: 0, end: 10 * pi).animate(
+      CurvedAnimation(
+          parent: _ballController, curve: Curves.easeInOut),
+    );
+
+    _ballScale = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween<double>(begin: 0.3, end: 1.2), weight: 30),
+      TweenSequenceItem(tween: Tween<double>(begin: 1.2, end: 0.8), weight: 40),
+      TweenSequenceItem(tween: Tween<double>(begin: 0.8, end: 0.5), weight: 30),
+    ]).animate(_ballController);
+
+    _ballPosition = TweenSequence<Offset>([
+      TweenSequenceItem(
+          tween: Tween<Offset>(
+            begin: const Offset(-4.0, 0.5),
+            end: const Offset(-2.0, -1.0),
+          ),
+          weight: 20),
+      TweenSequenceItem(
+          tween: Tween<Offset>(
+            begin: const Offset(-2.0, -1.0),
+            end: const Offset(0.0, -2.5),
+          ),
+          weight: 25),
+      TweenSequenceItem(
+          tween: Tween<Offset>(
+            begin: const Offset(0.0, -2.5),
+            end: const Offset(2.0, -1.5),
+          ),
+          weight: 25),
+      TweenSequenceItem(
+          tween: Tween<Offset>(
+            begin: const Offset(2.0, -1.5),
+            end: const Offset(4.5, 0.5),
+          ),
+          weight: 30),
+    ]).animate(
+      CurvedAnimation(parent: _ballController, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _screenAnimationController.dispose();
+    _ballController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _handleLoginClick() {
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill all fields'),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isButtonAnimating = true;
+      _isBallMoving = true;
+    });
+
+    _ballController.forward().then((_) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          setState(() {
+            _isButtonAnimating = false;
+            _isBallMoving = false;
+          });
+
+          _ballController.reset();
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ProfileScreen(),
+            ),
+          );
+        }
+      });
+    });
+  }
+
+  Widget _buildCricketBall(double size) {
+    return AnimatedBuilder(
+      animation: _ballController,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _ballScale.value,
+          child: Transform.rotate(
+            angle: _ballRotation.value,
+            child: Container(
+              width: size,
+              height: size,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [
+                    Colors.red.shade700,
+                    Colors.red.shade900,
+                  ],
+                  radius: 0.9,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF00FF00).withOpacity(0.4),
+                    blurRadius: 25,
+                    spreadRadius: 8,
+                  ),
+                ],
+              ),
+              child: CustomPaint(
+                painter: CricketBallPainter(),
+                size: Size(size, size),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.black,
+              Colors.grey.shade900,
+              const Color(0xFF00FF00).withOpacity(0.15),
+              Colors.black,
+            ],
+            stops: const [0.0, 0.3, 0.7, 1.0],
+          ),
+        ),
+        child: Stack(
+          children: [
+            // ===== MOVING CRICKET BALL =====
+            if (_isBallMoving)
+              AnimatedBuilder(
+                animation: _ballPosition,
+                builder: (context, child) {
+                  return Positioned(
+                    left: size.width / 2 +
+                        _ballPosition.value.dx * 100 -
+                        25,
+                    top: size.height / 2 +
+                        _ballPosition.value.dy * 100 -
+                        25,
+                    child: _buildCricketBall(50),
+                  );
+                },
+              ),
+
+            // ===== CRICKET BALL AT TOP =====
+            if (!_isBallMoving)
+              Positioned(
+                top: size.height * 0.05,
+                left: size.width / 2 - 35,
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0.8, end: 1.0),
+                  duration: const Duration(seconds: 2),
+                  curve: Curves.elasticOut,
+                  builder: (context, value, child) {
+                    return Transform.scale(
+                      scale: value,
+                      child: _buildCricketBall(70),
+                    );
+                  },
+                ),
+              ),
+
+            // ===== MAIN CONTENT =====
+            SafeArea(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Container(
+                  width: double.infinity,
+                  height: size.height -
+                      MediaQuery.of(context).padding.top -
+                      MediaQuery.of(context).padding.bottom,
+                  padding: const EdgeInsets.symmetric(horizontal: 28.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(height: 80),
+
+                      // ===== TITLE =====
+                      FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: Column(
+                            children: [
+                              TweenAnimationBuilder<double>(
+                                tween: Tween<double>(begin: 0.8, end: 1.0),
+                                duration: const Duration(seconds: 2),
+                                curve: Curves.elasticOut,
+                                builder: (context, value, child) {
+                                  return Transform.scale(
+                                    scale: value,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 10),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(20),
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            const Color(0xFF00FF00)
+                                                .withOpacity(0.3),
+                                            const Color(0xFF00CC00)
+                                                .withOpacity(0.3),
+                                          ],
+                                        ),
+                                        border: Border.all(
+                                          color: const Color(0xFF00FF00),
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            '🏏 CRICKET',
+                                            style: TextStyle(
+                                              fontSize: 28,
+                                              fontWeight: FontWeight.bold,
+                                              color: const Color(0xFF00FF00),
+                                              letterSpacing: 2,
+                                              shadows: [
+                                                Shadow(
+                                                  color: const Color(0xFF00FF00)
+                                                      .withOpacity(0.5),
+                                                  blurRadius: 20,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Text(
+                                            'WORLD CUP 2027',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              letterSpacing: 3,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                              const SizedBox(height: 20),
+
+                              SlideTransition(
+                                position: Tween<Offset>(
+                                  begin: const Offset(-1, 0),
+                                  end: Offset.zero,
+                                ).animate(
+                                  CurvedAnimation(
+                                    parent: _screenAnimationController,
+                                    curve: const Interval(0.5, 1.0,
+                                        curve: Curves.easeOut),
+                                  ),
+                                ),
+                                child: Text(
+                                  '🏏 Sign in to your account',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white70,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 50),
+
+                      // ===== INPUT FIELDS =====
+                      FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: Column(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF00FF00)
+                                          .withOpacity(0.2),
+                                      blurRadius: 20,
+                                      spreadRadius: 5,
+                                    ),
+                                  ],
+                                ),
+                                child: TextField(
+                                  controller: _emailController,
+                                  style: const TextStyle(color: Colors.white),
+                                  decoration: InputDecoration(
+                                    hintText: 'fan@cricketworldcup2027.com',
+                                    hintStyle: TextStyle(
+                                      color: Colors.grey.shade400,
+                                      fontSize: 16,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.email_outlined,
+                                      color: const Color(0xFF00FF00),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.grey.shade800,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding:
+                                    const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 18,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+
+                              Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFF00FF00)
+                                          .withOpacity(0.2),
+                                      blurRadius: 20,
+                                      spreadRadius: 5,
+                                    ),
+                                  ],
+                                ),
+                                child: TextField(
+                                  controller: _passwordController,
+                                  obscureText: _obscurePassword,
+                                  style: const TextStyle(color: Colors.white),
+                                  decoration: InputDecoration(
+                                    hintText: 'Your Cricket Password',
+                                    hintStyle: TextStyle(
+                                      color: Colors.grey.shade400,
+                                      fontSize: 16,
+                                    ),
+                                    prefixIcon: Icon(
+                                      Icons.lock_outline,
+                                      color: const Color(0xFF00FF00),
+                                    ),
+                                    suffixIcon: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          _obscurePassword = !_obscurePassword;
+                                        });
+                                      },
+                                      child: Icon(
+                                        _obscurePassword
+                                            ? Icons.visibility_off
+                                            : Icons.visibility,
+                                        color: const Color(0xFF00FF00),
+                                      ),
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.grey.shade800,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(15),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding:
+                                    const EdgeInsets.symmetric(
+                                      horizontal: 20,
+                                      vertical: 18,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 30),
+
+                              ElevatedButton(
+                                onPressed: _isButtonAnimating
+                                    ? null
+                                    : _handleLoginClick,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF00FF00),
+                                  foregroundColor: Colors.black,
+                                  elevation: 15,
+                                  minimumSize: const Size(double.infinity, 60),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  disabledBackgroundColor:
+                                  const Color(0xFF00FF00).withOpacity(0.5),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      _isButtonAnimating
+                                          ? 'Batting...'
+                                          : '🏏 Sign In',
+                                      style: const TextStyle(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                                    if (!_isButtonAnimating) ...[
+                                      const SizedBox(width: 10),
+                                      Icon(
+                                        Icons.sports_cricket,
+                                        color: Colors.black,
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 25),
+
+                              FadeTransition(
+                                opacity: Tween<double>(begin: 0, end: 1)
+                                    .animate(
+                                  CurvedAnimation(
+                                    parent: _screenAnimationController,
+                                    curve: const Interval(0.7, 1.0,
+                                        curve: Curves.easeIn),
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Don't have an account? ",
+                                      style: TextStyle(
+                                        color: Colors.white70,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                    TweenAnimationBuilder<double>(
+                                      tween:
+                                      Tween<double>(begin: 1.0, end: 1.05),
+                                      duration: const Duration(seconds: 2),
+                                      curve: Curves.elasticOut,
+                                      builder: (context, value, child) {
+                                        return Transform.scale(
+                                          scale: value,
+                                          child: Text(
+                                            'Sign Up',
+                                            style: TextStyle(
+                                              color: const Color(0xFF00FF00),
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              decoration:
+                                              TextDecoration.underline,
+                                              shadows: [
+                                                Shadow(
+                                                  color: const Color(0xFF00FF00)
+                                                      .withOpacity(0.5),
+                                                  blurRadius: 15,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============ PROFILE SCREEN ============
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen>
+    with TickerProviderStateMixin {
+  late AnimationController _profileAnimationController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _profileAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+          parent: _profileAnimationController, curve: Curves.easeIn),
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.5),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+          parent: _profileAnimationController, curve: Curves.elasticOut),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(
+          parent: _profileAnimationController, curve: Curves.elasticOut),
+    );
+
+    _profileAnimationController.forward();
+  }
+
+  @override
+  void dispose() {
+    _profileAnimationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.black,
+              Colors.grey.shade900,
+              const Color(0xFF00FF00).withOpacity(0.15),
+              Colors.black,
+            ],
+            stops: const [0.0, 0.3, 0.7, 1.0],
+          ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  // ===== BACK BUTTON =====
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const LoginScreen(),
+                            ),
+                          );
+                        },
+                        icon: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF00FF00).withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: const Color(0xFF00FF00),
+                              width: 1,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back,
+                            color: Color(0xFF00FF00),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // ===== PROFILE HEADER =====
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: SlideTransition(
+                      position: _slideAnimation,
+                      child: Column(
+                        children: [
+                          // Profile Avatar - Virat Kohli
+                          Container(
+                            width: 140,
+                            height: 140,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: LinearGradient(
+                                colors: [
+                                  const Color(0xFF00FF00),
+                                  const Color(0xFF00CC00),
+                                ],
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF00FF00).withOpacity(0.5),
+                                  blurRadius: 30,
+                                  spreadRadius: 10,
+                                ),
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: Container(
+                                color: Colors.black,
+                                child: Image.network(
+                                  'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Virat_Kohli_%28cropped%29.jpg/440px-Virat_Kohli_%28cropped%29.jpg',
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Center(
+                                      child: Icon(
+                                        Icons.person,
+                                        size: 70,
+                                        color: Color(0xFF00FF00),
+                                      ),
+                                    );
+                                  },
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return const Center(
+                                      child: CircularProgressIndicator(
+                                        color: Color(0xFF00FF00),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Player Name
+                          Text(
+                            'Virat Kohli',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF00FF00),
+                              letterSpacing: 1,
+                              shadows: [
+                                Shadow(
+                                  color: const Color(0xFF00FF00).withOpacity(0.5),
+                                  blurRadius: 20,
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade800,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: const Color(0xFF00FF00).withOpacity(0.3),
+                              ),
+                            ),
+                            child: Text(
+                              '🏏 Captain • Team India • Right-Handed Batsman',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey.shade300,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 30),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ===== STATS CARDS =====
+                  GridView.count(
+                    shrinkWrap: true,
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 1.1,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      _buildStatCard(
+                        '🏏',
+                        'Total Runs',
+                        '26,733',
+                        'Career Runs',
+                      ),
+                      _buildStatCard(
+                        '🎯',
+                        'Centuries',
+                        '78',
+                        'International',
+                      ),
+                      _buildStatCard(
+                        '🏏',
+                        'Test Runs',
+                        '8,848',
+                        'Test Matches',
+                      ),
+                      _buildStatCard(
+                        '⭐',
+                        'Rating',
+                        '922',
+                        'ICC Rating',
+                      ),
+                      _buildStatCard(
+                        '🏆',
+                        'Matches',
+                        '502',
+                        'International',
+                      ),
+                      _buildStatCard(
+                        '🎯',
+                        'Half-Centuries',
+                        '130',
+                        'Career',
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ===== CAREER HIGHLIGHTS =====
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade800,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFF00FF00).withOpacity(0.3),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.stars,
+                                color: Color(0xFF00FF00),
+                                size: 24,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Career Highlights',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _buildHighlightItem('🏆', 'World Cup Winner - 2011'),
+                          _buildHighlightItem('🏏', 'ICC Cricketer of the Year - 2017, 2018'),
+                          _buildHighlightItem('⭐', 'ICC ODI Player of the Year - 2012, 2017, 2018'),
+                          _buildHighlightItem('🎯', 'Fastest Century in ODI - 52 balls'),
+                          _buildHighlightItem('🏏', 'Most Test Centuries as Captain'),
+                          _buildHighlightItem('🏆', 'Rajiv Gandhi Khel Ratna Award - 2018'),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ===== RECENT MATCHES =====
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade800,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFF00FF00).withOpacity(0.3),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.sports_cricket,
+                                color: Color(0xFF00FF00),
+                                size: 24,
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Recent Matches',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+                          _buildMatchItem('vs Australia', '122* (118)', 'Player of the Match', '2 days ago'),
+                          _buildDivider(),
+                          _buildMatchItem('vs England', '98 (102)', 'Top Scorer', '5 days ago'),
+                          _buildDivider(),
+                          _buildMatchItem('vs South Africa', '154 (134)', 'Match Winner', '1 week ago'),
+                          _buildDivider(),
+                          _buildMatchItem('vs New Zealand', '75 (80)', 'Captain\'s Knock', '2 weeks ago'),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ===== LOGOUT BUTTON =====
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginScreen(),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red.shade700,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 50),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        elevation: 10,
+                      ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.logout, size: 20),
+                          SizedBox(width: 10),
+                          Text(
+                            'Logout',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String icon, String label, String value, String subtitle) {
+    return FadeTransition(
+      opacity: _fadeAnimation,
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey.shade800,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: const Color(0xFF00FF00).withOpacity(0.2),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF00FF00).withOpacity(0.1),
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  icon,
+                  style: const TextStyle(fontSize: 28),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF00FF00),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade400,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.grey.shade500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHighlightItem(String icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Text(icon, style: const TextStyle(fontSize: 18)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade300,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMatchItem(String opponent, String score, String achievement, String time) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF00FF00).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: const Icon(
+            Icons.sports_cricket,
+            color: Color(0xFF00FF00),
+            size: 20,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                opponent,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '$score • $achievement',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade400,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Text(
+          time,
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey.shade500,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDivider() {
+    return const Divider(
+      color: Colors.grey,
+      height: 12,
+    );
+  }
+}
+
+// ===== CUSTOM PAINTER FOR CRICKET BALL =====
+class CricketBallPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width * 0.4;
+
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.4)
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      -pi / 2,
+      pi,
+      false,
+      paint,
+    );
+
+    for (int i = 0; i < 6; i++) {
+      final angle = (i / 6) * 2 * pi + pi / 6;
+      final x1 = center.dx + radius * 0.6 * cos(angle);
+      final y1 = center.dy + radius * 0.6 * sin(angle);
+      final x2 = center.dx + radius * 0.9 * cos(angle);
+      final y2 = center.dy + radius * 0.9 * sin(angle);
+      canvas.drawLine(
+        Offset(x1, y1),
+        Offset(x2, y2),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}

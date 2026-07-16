@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Hyper-Compact 3D Pagination</title>
+    <style>
+        /* Reset & Strict Cursor Visibility */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            cursor: default !important;
+            transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+        }
+
+        a, button, .page-item, .arrow, .track-node, .step-dot {
+            cursor: pointer !important;
+        }
+
+        :root {
+            --bg-color: #060913;
+            --card-bg: rgba(15, 23, 42, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #475569;
+            --border: rgba(255, 255, 255, 0.06);
+            
+            /* High-Vibrancy Neon Colors */
+            --cyan: #00f2fe;
+            --purple: #9d4edd;
+            --rose: #ff007f;
+            --emerald: #00f5d4;
+            --amber: #ffb703;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 50% 50%, #131235 0%, #060913 70%);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        /* Hyper-Compact Floating Card (Reduced Height & Width) */
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            width: 100%;
+            max-width: 350px; /* Shrunk width */
+            padding: 14px 14px; /* Shrunk padding to decrease overall length */
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 
+                0 20px 40px rgba(0,0,0,0.7),
+                inset 0 1px 1px rgba(255,255,255,0.1);
+            transform: perspective(1000px) rotateX(1deg);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 12px; /* Decreased margin */
+        }
+
+        .header h1 {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #fff 40%, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: var(--cyan);
+            font-size: 8.5px;
+            margin-top: 1px;
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 8px rgba(0, 242, 254, 0.4);
+        }
+
+        /* Decreased Height & Margin for Ultra Short Look */
+        .style-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.02);
+            padding: 4px 10px;
+            margin-bottom: 5px; /* Shrunk spacing between rows */
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.01);
+            height: 34px; /* Shrunk row length from 44px to 34px */
+        }
+
+        .style-row:hover {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(0, 242, 254, 0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        .style-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+        }
+
+        .style-number {
+            background: rgba(255,255,255,0.06);
+            color: #fff;
+            width: 14px;
+            height: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 3px;
+            font-size: 8px;
+        }
+
+        .pagination-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 3px;
+        }
+
+        .page-item {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        /* Interactive Click Response */
+        .page-item:active, .arrow:active, .track-node:active, .step-dot:active {
+            transform: scale(0.86) !important;
+        }
+
+        .arrow {
+            color: var(--text-muted);
+            font-weight: 800;
+            font-size: 10px;
+            width: 14px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .arrow:hover {
+            color: #fff;
+            text-shadow: 0 0 6px #fff;
+        }
+
+        .dots {
+            color: var(--text-muted);
+            font-size: 10px;
+            width: 10px;
+            text-align: center;
+        }
+
+        /* 1. Classic Style */
+        .classic .page-item {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .classic .page-item:hover:not(.active) {
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+        }
+        .classic .page-item.active {
+            background: linear-gradient(180deg, #00f2fe, #00b8d4);
+            color: #000;
+            font-weight: 800;
+            box-shadow: 0 3px 6px rgba(0, 242, 254, 0.4);
+        }
+
+        /* 2. Pills Style */
+        .pills .page-item {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 10px;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .pills .page-item.active {
+            background: linear-gradient(180deg, var(--purple), #6f2dbd);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: 0 3px 6px rgba(157, 78, 221, 0.4);
+        }
+
+        /* 3. Dots Style */
+        .dots-style .page-item {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #1e293b;
+            margin: 0 3px;
+            text-indent: -9999px;
+        }
+        .dots-style .page-item.active {
+            background: var(--rose);
+            transform: scale(1.3);
+            box-shadow: 0 0 8px var(--rose);
+        }
+
+        /* 4. Bordered Style */
+        .bordered .page-item {
+            width: 18px;
+            height: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            font-size: 9px;
+            color: #64748b;
+        }
+        .bordered .page-item.active {
+            border-color: var(--cyan);
+            color: var(--cyan);
+            background: rgba(0, 242, 254, 0.03);
+            box-shadow: 0 0 6px rgba(0, 242, 254, 0.2);
+        }
+
+        /* 5. Track Style */
+        .track-style {
+            position: relative;
+            width: 75px; /* Sized perfectly for short layout */
+            height: 3px;
+            background: #0f172a;
+            border-radius: 1.5px;
+            margin: 0 4px;
+        }
+        .track-progress {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(90deg, #00f2fe, #ff007f);
+            border-radius: 1.5px;
+        }
+        .track-nodes {
+            position: absolute;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            top: -2.5px;
+        }
+        .track-node {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #1e293b;
+        }
+        .track-node.active {
+            background: #fff;
+            box-shadow: 0 0 6px #fff;
+        }
+
+        /* 6. Compact Style */
+        .compact { 
+            font-size: 11px; 
+            color: #64748b;
+            width: 105px;
+            justify-content: flex-end;
+        }
+        .compact .current-val {
+            color: #fff;
+            font-weight: 800;
+            background: rgba(255,255,255,0.06);
+            padding: 1px 5px;
+            border-radius: 3px;
+            margin: 0 3px;
+        }
+
+        /* 7. Progress Style */
+        .progress-bar-container {
+            width: 105px;
+            justify-content: flex-end;
+            font-size: 10px;
+            color: #64748b;
+        }
+        .bar-wrapper {
+            width: 50px;
+            height: 4px;
+            background: #0f172a;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 0 4px;
+        }
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00f5d4, #00bbf9);
+        }
+
+        /* 8. Steps Style */
+        .steps-container {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .step-dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #131a2c;
+            border: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: #64748b;
+        }
+        .step-dot.completed {
+            background: linear-gradient(180deg, #ffb703, #fb8500);
+            border-color: #ffb703;
+            color: #000;
+            font-weight: 800;
+        }
+        .step-dot.active {
+            border-color: var(--amber);
+            color: var(--amber);
+            font-weight: 800;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Pagination Styles</h1>
+            <p>8 interactive modes</p>
+        </div>
+
+        <div class="style-row">
+            <div class="style-label"><span class="style-number">1</span> Classic</div>
+            <div class="pagination-container classic">
+                <span class="arrow prev">&lt;</span>
+                <span class="page-item" data-page="1">1</span>
+                <span class="page-item" data-page="2">2</span>
+                <span class="page-item active" data-page="3">3</span>
+                <span class="page-item" data-page="4">4</span>
+                <span class="page-item" data-page="5">5</span>
+                <span class="arrow next">&gt;</span>
+            </div>
+        </div>
+
+        <div class="style-row">
+            <div class="style-label"><span class="style-number">2</span> Pills</div>
+            <div class="pagination-container pills">
+                <span class="arrow prev">&lt;</span>
+                <span class="page-item" data-page="1">1</span>
+                <span class="dots">...</span>
+                <span class="page-item" data-page="7">7</span>
+                <span class="page-item active" data-page="8">8</span>
+                <span class="page-item" data-page="9">9</span>
+                <span class="arrow next">&gt;</span>
+            </div>
+        </div>
+
+        <div class="style-row">
+            <div class="style-label"><span class="style-number">3</span> Dots</div>
+            <div class="pagination-container dots-style">
+                <span class="arrow prev">&lt;</span>
+                <span class="page-item" data-page="1">1</span>
+                <span class="page-item" data-page="2">2</span>
+                <span class="page-item active" data-page="3">3</span>
+                <span class="page-item" data-page="4">4</span>
+                <span class="page-item" data-page="5">5</span>
+                <span class="arrow next">&gt;</span>
+            </div>
+        </div>
+
+        <div class="style-row">
+            <div class="style-label"><span class="style-number">4</span> Bordered</div>
+            <div class="pagination-container bordered">
+                <span class="arrow prev">&lt;</span>
+                <span class="page-item" data-page="1">1</span>
+                <span class="page-item" data-page="2">2</span>
+                <span class="page-item active" data-page="3">3</span>
+                <span class="page-item" data-page="4">4</span>
+                <span class="page-item" data-page="5">5</span>
+                <span class="arrow next">&gt;</span>
+            </div>
+        </div>
+
+        <div class="style-row">
+            <div class="style-label"><span class="style-number">5</span> Track</div>
+            <div class="pagination-container container-track">
+                <span class="arrow prev" id="track-prev">&lt;</span>
+                <div class="track-style">
+                    <div class="track-progress" id="track-progress" style="width: 50%;"></div>
+                    <div class="track-nodes">
+                        <div class="track-node" data-page="1"></div>
+                        <div class="track-node" data-page="2"></div>
+                        <div class="track-node active" data-page="3"></div>
+                        <div class="track-node" data-page="4"></div>
+                        <div class="track-node" data-page="5"></div>
+                    </div>
+                </div>
+                <span class="arrow next" id="track-next">&gt;</span>
+            </div>
+        </div>
+
+        <div class="style-row">
+            <div class="style-label"><span class="style-number">6</span> Compact</div>
+            <div class="pagination-container compact">
+                <span class="arrow prev" id="comp-prev">&lt;</span>
+                <span class="current-val" id="comp-val">3</span> / 5
+                <span class="arrow next" id="comp-next">&gt;</span>
+            </div>
+        </div>
+
+        <div class="style-row">
+            <div class="style-label"><span class="style-number">7</span> Progress</div>
+            <div class="pagination-container progress-bar-container">
+                <span class="arrow prev" id="prog-prev">&lt;</span>
+                <div class="bar-wrapper">
+                    <div class="bar-fill" id="prog-fill" style="width: 60%;"></div>
+                </div>
+                <span id="prog-val" style="color:#fff; font-weight:700; margin-right:2px;">3</span>/5
+                <span class="arrow next" id="prog-next">&gt;</span>
+            </div>
+        </div>
+
+        <div class="style-row">
+            <div class="style-label"><span class="style-number">8</span> Steps</div>
+            <div class="pagination-container steps-parent">
+                <span class="arrow prev" id="step-prev">&lt;</span>
+                <div class="steps-container">
+                    <div class="step-dot completed" data-step="1">1</div>
+                    <div class="step-dot completed" data-step="2">2</div>
+                    <div class="step-dot active" data-step="3">3</div>
+                    <div class="step-dot" data-step="4">4</div>
+                    <div class="step-dot" data-step="5">5</div>
+                </div>
+                <span class="arrow next" id="step-next">&gt;</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Core Event Engine
+        function setupStandardPagination(containerSelector) {
+            const container = document.querySelector(containerSelector);
+            const items = container.querySelectorAll('.page-item');
+            const prev = container.querySelector('.prev');
+            const next = container.querySelector('.next');
+
+            items.forEach(item => {
+                item.addEventListener('click', () => {
+                    container.querySelector('.page-item.active').classList.remove('active');
+                    item.classList.add('active');
+                });
+            });
+
+            prev.addEventListener('click', () => {
+                const active = container.querySelector('.page-item.active');
+                const prevElem = active.previousElementSibling;
+                if (prevElem && prevElem.classList.contains('page-item')) {
+                    active.classList.remove('active');
+                    prevElem.classList.add('active');
+                }
+            });
+
+            next.addEventListener('click', () => {
+                const active = container.querySelector('.page-item.active');
+                const nextElem = active.nextElementSibling;
+                if (nextElem && nextElem.classList.contains('page-item')) {
+                    active.classList.remove('active');
+                    nextElem.classList.add('active');
+                }
+            });
+        }
+
+        setupStandardPagination('.classic');
+        setupStandardPagination('.pills');
+        setupStandardPagination('.dots-style');
+        setupStandardPagination('.bordered');
+
+        // 5. Track Logic
+        let trackPage = 3;
+        const totalTrackPages = 5;
+        const trackNodes = document.querySelectorAll('.track-node');
+        const trackProgress = document.getElementById('track-progress');
+        
+        function updateTrack(page) {
+            trackPage = Math.max(1, Math.min(page, totalTrackPages));
+            trackNodes.forEach((node, idx) => {
+                if (idx + 1 === trackPage) node.classList.add('active');
+                else node.classList.remove('active');
+            });
+            const progressPercent = ((trackPage - 1) / (totalTrackPages - 1)) * 100;
+            trackProgress.style.width = `${progressPercent}%`;
+        }
+        document.getElementById('track-prev').addEventListener('click', () => updateTrack(trackPage - 1));
+        document.getElementById('track-next').addEventListener('click', () => updateTrack(trackPage + 1));
+        trackNodes.forEach(node => {
+            node.addEventListener('click', (e) => updateTrack(parseInt(e.target.dataset.page)));
+        });
+
+        // 6. Compact Logic
+        let compactPage = 3;
+        const compVal = document.getElementById('comp-val');
+        document.getElementById('comp-prev').addEventListener('click', () => {
+            if (compactPage > 1) { compactPage--; compVal.innerText = compactPage; }
+        });
+        document.getElementById('comp-next').addEventListener('click', () => {
+            if (compactPage < 5) { compactPage++; compVal.innerText = compactPage; }
+        });
+
+        // 7. Progress Logic
+        let progressPage = 3;
+        const progFill = document.getElementById('prog-fill');
+        const progVal = document.getElementById('prog-val');
+        function updateProgressBar() {
+            progVal.innerText = progressPage;
+            progFill.style.width = `${(progressPage / 5) * 100}%`;
+        }
+        document.getElementById('prog-prev').addEventListener('click', () => {
+            if (progressPage > 1) { progressPage--; updateProgressBar(); }
+        });
+        document.getElementById('prog-next').addEventListener('click', () => {
+            if (progressPage < 5) { progressPage++; updateProgressBar(); }
+        });
+
+        // 8. Steps Logic
+        let stepPage = 3;
+        const stepDots = document.querySelectorAll('.step-dot');
+        function updateSteps() {
+            stepDots.forEach((dot, idx) => {
+                const currentStep = idx + 1;
+                dot.className = 'step-dot';
+                if (currentStep < stepPage) dot.classList.add('completed');
+                else if (currentStep === stepPage) dot.classList.add('active');
+            });
+        }
+        document.getElementById('step-prev').addEventListener('click', () => {
+            if (stepPage > 1) { stepPage--; updateSteps(); }
+        });
+        document.getElementById('step-next').addEventListener('click', () => {
+            if (stepPage < 5) { stepPage++; updateSteps(); }
+        });
+        stepDots.forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                stepPage = parseInt(e.target.dataset.step);
+                updateSteps();
+            });
+        });
+    </script>
+</body>
+</html>
