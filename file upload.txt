@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compact Premium Dropzone with Success Animation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Charcoal Dark Neumorphic Palette */
+      --bg-color: #121316;
+      --card-bg: #18191c;
+      
+      /* Neumorphic Shadows */
+      --shadow-out-1: 6px 6px 12px #0c0d0e;
+      --shadow-out-2: -6px -6px 12px #24252a;
+      --shadow-in-1: inset 3px 3px 6px #0c0d0e;
+      --shadow-in-2: inset -3px -3px 6px #24252a;
+      
+      /* Accents */
+      --accent: #8a5cf5;
+      --success: #10b981;
+      --text-main: #e2e8f0;
+      --text-muted: #6b7280;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      user-select: none;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      perspective: 1000px;
+    }
+
+    /* EXACT HALF / ULTRA-COMPACT PREMIUM CARD */
+    .dropzone-card {
+      width: 250px; /* Width shortened and highly optimized */
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 16px;
+      box-shadow: var(--shadow-out-1), var(--shadow-out-2);
+      position: relative;
+      overflow: hidden; /* For confetti bounds */
+    }
+
+    /* Compact Header */
+    .header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-main);
+    }
+
+    /* Neumorphic Drop Area - Scaled Down */
+    .drop-area {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px 10px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-in-1), var(--shadow-in-2);
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .drop-area.drag-over {
+      transform: scale(0.97);
+    }
+
+    .drop-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--card-bg);
+      border-radius: 50%;
+      box-shadow: var(--shadow-out-1), var(--shadow-out-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px;
+      color: var(--accent);
+      transition: all 0.2s;
+    }
+
+    .drop-text {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    #file-input {
+      display: none;
+    }
+
+    /* Compact Scrollable List */
+    .file-list {
+      margin-top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .file-list::-webkit-scrollbar {
+      width: 3px;
+    }
+    .file-list::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+    }
+
+    /* Small File Item */
+    .file-item {
+      background: var(--card-bg);
+      border-radius: 10px;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      box-shadow: var(--shadow-out-1), var(--shadow-out-2);
+    }
+
+    /* Wave Frame - Compact */
+    .preview-frame {
+      position: relative;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      background: #111215;
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow: inset 1px 1px 3px rgba(0,0,0,0.5);
+    }
+
+    .img-ghost {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(1) brightness(0.2);
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    /* Liquid Wave Mask */
+    .img-live {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: absolute;
+      top: 0;
+      left: 0;
+      -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M0,60 C30,45 90,75 120,60 L120,120 L0,120 Z" fill="black"/></svg>');
+      mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M0,60 C30,45 90,75 120,60 L120,120 L0,120 Z" fill="black"/></svg>');
+      -webkit-mask-size: 200% 200%;
+      mask-size: 200% 200%;
+      -webkit-mask-position: 0% 100%;
+      mask-position: 0% 100%;
+      transition: mask-position 0.1s linear, -webkit-mask-position 0.1s linear;
+    }
+
+    /* Progress Glass Panel */
+    .img-percentage {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(14, 15, 17, 0.7);
+      backdrop-filter: blur(1px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: 700;
+      color: #fff;
+      transition: opacity 0.2s ease;
+      z-index: 2;
+    }
+
+    .img-percentage.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .file-info {
+      flex-grow: 1;
+      min-width: 0;
+    }
+
+    .file-name {
+      font-size: 9px;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-main);
+    }
+
+    .file-meta {
+      font-size: 8px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .status-complete {
+      color: var(--success);
+      font-weight: 700;
+    }
+
+    /* Micro Neumorphic Progress bar */
+    .progress-track {
+      margin-top: 3px;
+      height: 3px;
+      background: var(--bg-color);
+      border-radius: 10px;
+      box-shadow: inset 1px 1px 2px rgba(0,0,0,0.7);
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--accent), #a88bf8);
+      border-radius: 10px;
+      transition: width 0.1s linear;
+    }
+
+    /* Compact Neumorphic Action Button */
+    .action-btn {
+      background: var(--card-bg);
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-out-1), var(--shadow-out-2);
+      transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+      box-shadow: var(--shadow-in-1), var(--shadow-in-2);
+      color: #ef4444;
+    }
+
+    .check-success {
+      width: 14px;
+      height: 14px;
+      background: var(--success);
+      color: #fff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+      animation: scalePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes scalePop {
+      0% { transform: scale(0); }
+      100% { transform: scale(1); }
+    }
+
+    /* Compact Footer */
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .footer-status {
+      font-size: 9px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .clear-btn {
+      background: var(--card-bg);
+      border: none;
+      color: var(--text-main);
+      padding: 4px 8px;
+      font-size: 9px;
+      font-weight: 600;
+      border-radius: 6px;
+      box-shadow: var(--shadow-out-1), var(--shadow-out-2);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .clear-btn:hover {
+      box-shadow: var(--shadow-in-1), var(--shadow-in-2);
+    }
+
+    /* --- CONFETTI ANIMATION ELEMENTS --- */
+    .confetti {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="dropzone-card" id="card">
+    <div class="header">
+      <h1>Upload Files</h1>
+    </div>
+
+    <div class="drop-area" id="drop-area">
+      <div class="drop-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+      </div>
+      <p class="drop-text">Drag files here</p>
+      <input type="file" id="file-input" multiple accept="image/*, application/pdf">
+    </div>
+
+    <div class="file-list" id="file-list"></div>
+
+    <div class="footer">
+      <div class="footer-status" id="footer-status">0 of 0 uploaded</div>
+      <button class="clear-btn" id="clear-btn">Clear</button>
+    </div>
+  </div>
+
+  <script>
+    const card = document.getElementById('card');
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('file-input');
+    const fileList = document.getElementById('file-list');
+    const footerStatus = document.getElementById('footer-status');
+    const clearBtn = document.getElementById('clear-btn');
+
+    let filesArray = [];
+    let lastDropCoords = null;
+
+    // Trigger browsing
+    dropArea.addEventListener('click', () => fileInput.click());
+
+    // Drag states
+    dropArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropArea.classList.add('drag-over');
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.classList.remove('drag-over');
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropArea.classList.remove('drag-over');
+      
+      lastDropCoords = { x: e.clientX, y: e.clientY };
+      handleFiles(e.dataTransfer.files);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const rect = dropArea.getBoundingClientRect();
+      lastDropCoords = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+      handleFiles(e.target.files);
+    });
+
+    function handleFiles(files) {
+      if (filesArray.length >= 4) return; // Limit to max 4 on half-size card
+
+      Array.from(files).forEach((file) => {
+        if (filesArray.length >= 4) return;
+
+        const fileId = 'f-' + Math.random().toString(36).substr(2, 9);
+        const fileObj = {
+          id: fileId,
+          name: file.name,
+          size: formatBytes(file.size),
+          status: 'uploading',
+          imgSrc: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=80&auto=format&fit=crop&q=80' 
+        };
+
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const ghost = document.getElementById(`ghost-${fileId}`);
+            const live = document.getElementById(`live-${fileId}`);
+            if (ghost) ghost.src = e.target.result;
+            if (live) live.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+
+        filesArray.push(fileObj);
+        renderFile(fileObj);
+      });
+      updateStatus();
+    }
+
+    function renderFile(fileObj) {
+      const el = document.createElement('div');
+      el.classList.add('file-item');
+      el.id = `item-${fileObj.id}`;
+      
+      el.innerHTML = `
+        <div class="preview-frame">
+          <img class="img-ghost" id="ghost-${fileObj.id}" src="${fileObj.imgSrc}" alt="">
+          <img class="img-live" id="live-${fileObj.id}" src="${fileObj.imgSrc}" alt="">
+          <div class="img-percentage" id="percent-${fileObj.id}">0%</div>
+        </div>
+        <div class="file-info">
+          <div class="file-name">${fileObj.name}</div>
+          <div class="file-meta">
+            <span id="badge-${fileObj.id}">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="fill-${fileObj.id}"></div>
+          </div>
+        </div>
+        <div id="action-slot-${fileObj.id}">
+          <button class="action-btn" onclick="deleteItem('${fileObj.id}')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      `;
+
+      fileList.appendChild(el);
+
+      // --- SPRING ENTRANCE TRAJECTORY ---
+      const itemRect = el.getBoundingClientRect();
+      if (lastDropCoords) {
+        const startX = lastDropCoords.x - itemRect.left - 15;
+        const startY = lastDropCoords.y - itemRect.top - 15;
+        
+        el.animate([
+          { transform: `translate(${startX}px, ${startY}px) scale(0.3)`, opacity: 0 },
+          { transform: 'translate(0, 0) scale(1)', opacity: 1 }
+        ], {
+          duration: 550,
+          easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.2)'
+        });
+      }
+
+      startLinearLiquidUpload(fileObj);
+    }
+
+    // Sequence progress upload with linear timer
+    function startLinearLiquidUpload(fileObj) {
+      const fill = document.getElementById(`fill-${fileObj.id}`);
+      const badge = document.getElementById(`badge-${fileObj.id}`);
+      const percentLabel = document.getElementById(`percent-${fileObj.id}`);
+      const liveImg = document.getElementById(`live-${fileObj.id}`);
+      const actionSlot = document.getElementById(`action-slot-${fileObj.id}`);
+
+      let currentPercent = 0;
+      const totalSteps = 100;
+      const intervalTime = 25; // Super quick & smooth
+
+      const timer = setInterval(() => {
+        currentPercent += 1; // Pure 1% sequence increments
+
+        if (currentPercent >= totalSteps) {
+          currentPercent = totalSteps;
+          clearInterval(timer);
+
+          // Complete State
+          badge.textContent = "Done";
+          badge.className = "status-complete";
+          percentLabel.classList.add('hidden');
+          
+          actionSlot.innerHTML = `
+            <div class="check-success">
+              <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          `;
+          
+          fileObj.status = 'uploaded';
+          updateStatus();
+          
+          // PREMIUM TRIGGER: Confetti Explosion!
+          triggerConfetti(actionSlot);
+        } else {
+          percentLabel.textContent = `${currentPercent}%`;
+          badge.textContent = `${currentPercent}%`;
+        }
+
+        fill.style.width = `${currentPercent}%`;
+
+        // Wave Shift positioning
+        const maskPosition = 100 - currentPercent;
+        liveImg.style.webkitMaskPosition = `0% ${maskPosition}%`;
+        liveImg.style.maskPosition = `0% ${maskPosition}%`;
+
+      }, intervalTime);
+    }
+
+    // PREMIUM SUCCESS ANIMATION: Micro Confetti Burst
+    function triggerConfetti(target) {
+      const targetRect = target.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      
+      const originX = targetRect.left - cardRect.left + (targetRect.width / 2);
+      const originY = targetRect.top - cardRect.top + (targetRect.height / 2);
+
+      const colors = ['#8a5cf5', '#10b981', '#ff5e57', '#ffca28', '#29b6f6'];
+
+      for (let i = 0; i < 24; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('confetti');
+        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.left = `${originX}px`;
+        particle.style.top = `${originY}px`;
+        
+        card.appendChild(particle);
+
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = 25 + Math.random() * 45;
+        const targetX = Math.cos(angle) * velocity;
+        const targetY = Math.sin(angle) * velocity;
+
+        particle.animate([
+          { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+          { transform: `translate(${targetX}px, ${targetY}px) scale(0.3)`, opacity: 0 }
+        ], {
+          duration: 600 + Math.random() * 400,
+          easing: 'cubic-bezier(0.1, 0.8, 0.25, 1)'
+        }).onfinish = () => {
+          particle.remove();
+        };
+      }
+    }
+
+    window.deleteItem = function(id) {
+      filesArray = filesArray.filter(f => f.id !== id);
+      const el = document.getElementById(`item-${id}`);
+      if (el) {
+        el.animate([
+          { opacity: 1, transform: 'scale(1)' },
+          { opacity: 0, transform: 'scale(0.8) translateY(-10px)' }
+        ], { duration: 180, easing: 'ease' }).onfinish = () => {
+          el.remove();
+          updateStatus();
+        };
+      }
+    };
+
+    clearBtn.addEventListener('click', () => {
+      filesArray = [];
+      fileList.innerHTML = '';
+      updateStatus();
+    });
+
+    function updateStatus() {
+      const total = filesArray.length;
+      const uploaded = filesArray.filter(f => f.status === 'uploaded').length;
+      footerStatus.textContent = `${uploaded} of ${total} uploaded`;
+    }
+
+    function formatBytes(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    }
+  </script>
+</body>
+</html>
