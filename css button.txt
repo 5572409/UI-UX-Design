@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Embossed & Interactive Buttons - Half Size</title>
+    <style>
+        /* --- CSS Global Variables & Reset --- */
+        :root {
+            --bg-color: #e0e8f6;
+            --primary-shadow: -5px -5px 10px #ffffff, 5px 5px 10px #94a3b8; /* Halved shadows */
+            --inner-shadow: inset -5px -5px 9px #ffffff, inset 5px 5px 9px #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: #334155;
+            padding: 20px 10px; /* Reduced padding */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Smaller main heading */
+        h1 {
+            margin-bottom: 4px;
+            font-size: 1.2rem; 
+            color: #1e293b;
+            text-align: center;
+        }
+
+        /* Smaller subtitle */
+        p.subtitle {
+            margin-bottom: 20px;
+            color: #64748b;
+            text-align: center;
+            font-size: 0.75rem; 
+        }
+
+        /* --- Halved Vertical Container --- */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px; /* Halved gap from 30px */
+            width: 100%;
+            max-width: 225px; /* Halved width from 450px */
+        }
+
+        /* Halved Card Dimensions */
+        .card {
+            background: #e0e8f6;
+            border-radius: 10px; /* Halved from 20px */
+            padding: 12px; /* Halved from 25px */
+            box-shadow: var(--primary-shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100px; /* Halved from 200px */
+            width: 100%;
+        }
+
+        /* Smaller card title */
+        .card-title {
+            font-size: 0.75rem; 
+            font-weight: 600;
+            margin-bottom: 8px; /* Halved from 15px */
+            color: #475569;
+            text-align: center;
+        }
+
+        .button-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        /* --- ALL 8 BUTTON STYLES (Scaled Down) --- */
+
+        .btn {
+            border: none;
+            outline: none;
+            cursor: pointer;
+            font-size: 0.8rem; /* Slightly smaller text */
+            font-weight: 600;
+            transition: all 0.3s ease;
+            user-select: none;
+            padding: 8px 18px; /* Halved padding */
+            border-radius: 6px; /* Halved border-radius */
+        }
+
+        /* 1. Classic Embossed Button */
+        .btn-classic {
+            background: #e0e8f6;
+            color: #475569;
+            box-shadow: var(--primary-shadow);
+        }
+        .btn-classic:hover {
+            transform: translateY(-1px);
+            box-shadow: -5px -5px 10px #ffffff, 5px 5px 10px #94a3b8;
+        }
+        .btn-classic:active {
+            transform: translateY(1px);
+            box-shadow: var(--inner-shadow);
+        }
+
+        /* 2. Pressed Embossed Button */
+        .btn-pressed {
+            background: #e0e8f6;
+            color: #475569;
+            box-shadow: var(--inner-shadow);
+        }
+        .btn-pressed:hover {
+            box-shadow: -5px -5px 9px #ffffff, inset -5px -5px 9px #fff, inset 5px 5px 9px #94a3b8;
+        }
+
+        /* 3. Neon Embossed Button */
+        .btn-neon {
+            background: #38bdf8;
+            color: #0f172a;
+            box-shadow: var(--primary-shadow);
+        }
+        .btn-neon:hover {
+            background: #38bdf8;
+            color: #0f172a;
+            box-shadow: 0 0 15px #38bdf8;
+            transform: translateY(-1px);
+        }
+
+        /* 4. Gradient Embossed Button */
+        .btn-gradient {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            box-shadow: var(--primary-shadow);
+        }
+        .btn-gradient:hover {
+            transform: translateY(-1px) scale(1.02);
+            box-shadow: 0 8px 12px rgba(236, 72, 153, 0.4);
+        }
+
+        /* 5. Metallic Embossed Button */
+        .btn-metal {
+            background: linear-gradient(135deg, #f1f5f9, #cbd5e1);
+            color: #334155;
+            box-shadow: var(--primary-shadow);
+            border: 1px solid #e2e8f0;
+        }
+        .btn-metal:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+
+        /* 6. 3D Embossed Button */
+        .btn-3d {
+            background: #3b82f6;
+            color: white;
+            box-shadow: 0 4px 0 #1d4ed8, var(--primary-shadow); /* Halved 3D depth */
+            position: relative;
+        }
+        .btn-3d:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 5px 0 #1d4ed8, 0 8px 12px rgba(59, 130, 246, 0.4);
+        }
+        .btn-3d:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #1d4ed8, 0 3px 5px rgba(59, 130, 246, 0.4);
+        }
+
+        /* 7. Circular Embossed Button */
+        .btn-circular {
+            background: #e0e8f6;
+            color: #475569;
+            width: 35px; /* Halved from 60px */
+            height: 35px; /* Halved from 60px */
+            border-radius: 50%;
+            box-shadow: var(--primary-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            padding: 0;
+        }
+        .btn-circular:hover {
+            transform: rotate(90deg);
+            color: #38bdf8;
+        }
+
+        /* 8. Glass Embossed Card & Button */
+        .glass-card {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            border-radius: 10px;
+            padding: 12px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100px;
+            box-shadow: var(--primary-shadow);
+        }
+        .btn-glass {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.15);
+        }
+        .btn-glass:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* --- JS Dynamic CSS States --- */
+        .btn-toggle-active {
+            box-shadow: var(--inner-shadow);
+            color: #38bdf8 !important;
+            background: #d0dbe9;
+        }
+
+        .btn-loading {
+            position: relative;
+            color: transparent !important;
+            pointer-events: none;
+        }
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 12px; /* Smaller loader */
+            height: 12px;
+            top: 50%;
+            left: 50%;
+            margin-top: -6px;
+            margin-left: -6px;
+            border: 2px solid rgba(0,0,0,0.1);
+            border-top-color: #475569;
+            border-radius: 50%;
+            animation: spin 1s infinite linear;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Dropdown CSS */
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e0e8f6;
+            box-shadow: var(--primary-shadow);
+            border-radius: 6px;
+            padding: 6px;
+            min-width: 100px;
+            z-index: 10;
+        }
+        .dropdown-menu a {
+            display: block;
+            padding: 4px 8px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        .dropdown-menu a:hover {
+            background: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+        }
+        .show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>CSS Buttons</h1>
+    <p class="subtitle">HTML, CSS, & JS Halved-Size Feed</p>
+
+    <div class="container">
+
+        <!-- 1. Classic Embossed Button -->
+        <div class="card">
+            <div class="card-title">1. Classic</div>
+            <div class="button-wrapper">
+                <button type="button" class="btn btn-classic">Classic</button>
+            </div>
+        </div>
+
+        <!-- 2. Pressed Embossed Button -->
+        <div class="card">
+            <div class="card-title">2. Pressed</div>
+            <div class="button-wrapper">
+                <button type="button" class="btn btn-pressed">Pressed</button>
+            </div>
+        </div>
+
+        <!-- 3. Neon Embossed Button -->
+        <div class="card">
+            <div class="card-title">3. Neon</div>
+            <div class="button-wrapper">
+                <button type="button" class="btn btn-neon">Neon</button>
+            </div>
+        </div>
+
+        <!-- 4. Gradient Embossed Button -->
+        <div class="card">
+            <div class="card-title">4. Gradient</div>
+            <div class="button-wrapper">
+                <button type="button" class="btn btn-gradient">Gradient</button>
+            </div>
+        </div>
+
+        <!-- 5. Metallic Embossed Button -->
+        <div class="card">
+            <div class="card-title">5. Metal</div>
+            <div class="button-wrapper">
+                <button type="button" class="btn btn-metal">Metal</button>
+            </div>
+        </div>
+
+        <!-- 6. 3D Embossed Button -->
+        <div class="card">
+            <div class="card-title">6. 3D Button</div>
+            <div class="button-wrapper">
+                <button type="button" class="btn btn-3d">3D Button</button>
+            </div>
+        </div>
+
+        <!-- 7. Circular Embossed Button (Icon/FAB) -->
+        <div class="card">
+            <div class="card-title">7. Circular</div>
+            <div class="button-wrapper">
+                <button type="button" class="btn btn-circular">+</button>
+            </div>
+        </div>
+
+        <!-- 8. Glass Embossed Button -->
+        <div class="glass-card">
+            <div class="card-title" style="color: white;">8. Glass</div>
+            <div class="button-wrapper">
+                <button type="button" class="btn btn-glass">Glass</button>
+            </div>
+        </div>
+
+        <!-- JS Dynamic Demo: Dropdown -->
+        <div class="card">
+            <div class="card-title">JS: Dropdown</div>
+            <div class="button-wrapper">
+                <div class="dropdown-container">
+                    <button type="button" class="btn btn-classic" id="dropdownBtn">Dropdown ▾</button>
+                    <div class="dropdown-menu" id="dropdownMenu">
+                        <a href="#">Profile</a>
+                        <a href="#">Settings</a>
+                        <a href="#">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- JS Dynamic Demo: Toggle & Loading -->
+        <div class="card">
+            <div class="card-title">JS: Toggle & Load</div>
+            <div class="button-wrapper" style="flex-direction: column; gap: 8px;">
+                <button type="button" class="btn btn-classic" id="toggleBtn">Toggle Mode</button>
+                <button type="button" class="btn btn-classic" id="loadingBtn">Load</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- --- JAVASCRIPT --- -->
+    <script>
+        // Dropdown Menu Toggle
+        const dropdownBtn = document.getElementById('dropdownBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        dropdownBtn.addEventListener('click', () => {
+            dropdownMenu.classList.toggle('show');
+        });
+
+        // Dropdown close on outside click
+        window.addEventListener('click', (e) => {
+            if (!dropdownBtn.contains(e.target)) {
+                dropdownMenu.classList.remove('show');
+            }
+        });
+
+        // Toggle Button State
+        const toggleBtn = document.getElementById('toggleBtn');
+        toggleBtn.addEventListener('click', () => {
+            toggleBtn.classList.toggle('btn-toggle-active');
+            if (toggleBtn.classList.contains('btn-toggle-active')) {
+                toggleBtn.innerText = "Active";
+            } else {
+                toggleBtn.innerText = "Toggle Mode";
+            }
+        });
+
+        // Loading Spinner Simulation
+        const loadingBtn = document.getElementById('loadingBtn');
+        loadingBtn.addEventListener('click', () => {
+            loadingBtn.classList.add('btn-loading');
+            setTimeout(() => {
+                loadingBtn.classList.remove('btn-loading');
+                alert('Success! Data fetched.');
+            }, 2000); // 2 second loading delay
+        });
+    </script>
+</body>
+</html>
