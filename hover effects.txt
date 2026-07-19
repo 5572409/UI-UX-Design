@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Micro Glass Hover Effects</title>
+    <style>
+        /* ==========================================
+           1. EYE-CATCHING LIGHT GLASS UI SETUP
+           ========================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: '-apple-system', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            background-attachment: fixed;
+            color: #2d3748;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px 10px;
+            min-height: 100vh;
+        }
+
+        h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #4a5568;
+            letter-spacing: 0.5px;
+        }
+
+        .container-vertical {
+            display: flex;
+            flex-direction: column;
+            gap: 6px; 
+            width: 100%;
+            max-width: 190px; /* Micro size */
+            align-items: center;
+        }
+
+        /* Light Glassmorphism Base Style */
+        .glass-btn {
+            width: 100%;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 6px;
+            text-align: left;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 6px rgba(31, 38, 135, 0.03);
+            user-select: none;
+        }
+
+        .glass-btn h3 {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #1a202c;
+            line-height: 1.2;
+        }
+
+        .glass-btn p {
+            font-size: 0.6rem;
+            color: #718096;
+        }
+
+        /* Visual Feedback Dot Indicator */
+        .glass-btn::after {
+            content: '';
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 4px;
+            height: 4px;
+            background: #ef4444;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+        .glass-btn.active::after {
+            opacity: 1;
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            50% { opacity: 0.3; }
+        }
+
+        /* ==========================================
+           2. EFFECTS CONTROLLERS (JS TRIGGERED ON HOVER)
+           ========================================== */
+
+        /* 1. Neon Glow */
+        .effect-neon.active {
+            border-color: #ff007f;
+            background: rgba(255, 0, 127, 0.15);
+            box-shadow: 0 0 12px rgba(255, 0, 127, 0.5);
+        }
+
+        /* 2. Stretchy Elastic */
+        .effect-stretchy.active {
+            transform: scaleX(1.08) scaleY(0.9);
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        /* 3. Shimmer Flash */
+        .effect-shimmer .shimmer-line {
+            position: absolute;
+            top: 0; left: -150%;
+            width: 30%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.8), transparent);
+            transform: skewX(-20deg);
+        }
+        .effect-shimmer.active .shimmer-line {
+            left: 150%;
+            transition: all 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 4. Border Draw */
+        .effect-border-draw::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 0; height: 100%;
+            border-top: 1.5px solid #4f46e5;
+            border-bottom: 1.5px solid #4f46e5;
+            transition: width 1s linear;
+        }
+        .effect-border-draw.active::before {
+            width: 100%;
+        }
+
+        /* 5. Slide Fill Up */
+        .effect-fill-up::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 0;
+            background: rgba(79, 70, 229, 0.2);
+            transition: all 1s ease;
+            z-index: 1;
+        }
+        .effect-fill-up.active::before {
+            height: 100%;
+        }
+
+        /* 6. Context Blur */
+        .container-vertical.blur-mode .effect-blur:not(.active) {
+            filter: blur(3px);
+            opacity: 0.3;
+        }
+        .effect-blur.active {
+            background: rgba(255, 255, 255, 0.8);
+            transform: scale(1.02);
+        }
+
+        /* 7. Gradient Text */
+        .effect-gradient.active h3 {
+            background: linear-gradient(45deg, #4f46e5, #ff007f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Heading Changed to Hover Panel -->
+    <h1>Hover Effects</h1>
+
+    <div class="container-vertical" id="mainContainer">
+
+        <!-- 1. Neon Glow -->
+        <div class="glass-btn effect-neon">
+            <h3>Neon Glow</h3>
+            <p>Pink aura.</p>
+        </div>
+
+        <!-- 2. Stretchy -->
+        <div class="glass-btn effect-stretchy">
+            <h3>Stretchy</h3>
+            <p>Elastic pop.</p>
+        </div>
+
+        <!-- 3. Shimmer -->
+        <div class="glass-btn effect-shimmer">
+            <div class="shimmer-line"></div>
+            <h3>Shimmer</h3>
+            <p>Gloss flash.</p>
+        </div>
+
+        <!-- 4. Border Draw -->
+        <div class="glass-btn effect-border-draw">
+            <h3>Border Draw</h3>
+            <p>Lines sweep.</p>
+        </div>
+
+        <!-- 5. Fill Up -->
+        <div class="glass-btn effect-fill-up">
+            <h3>Slide Fill</h3>
+            <p>Indigo overlay.</p>
+        </div>
+
+        <!-- 6. Blur Focus -->
+        <div class="glass-btn effect-blur">
+            <h3>Context Blur</h3>
+            <p>Isolates button.</p>
+        </div>
+
+        <!-- 7. Gradient Text -->
+        <div class="glass-btn effect-gradient">
+            <h3>Gradient Text</h3>
+            <p>Color shift.</p>
+        </div>
+
+        <!-- 8. 3D Tilt -->
+        <div class="glass-btn" id="tiltCard">
+            <h3>3D Hover</h3>
+            <p>Physical tilt.</p>
+        </div>
+
+    </div>
+
+    <!-- ==========================================
+       JAVASCRIPT FOR HOVER LAUNCH & 1-SEC STATE LOCK
+       ========================================== -->
+    <script>
+        const buttons = document.querySelectorAll('.glass-btn:not(#tiltCard)');
+        const container = document.getElementById('mainContainer');
+
+        // Mouse Enter (Hover) Event for 1-Second Persistence
+        buttons.forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                // Effect trigger aur class add karna
+                btn.classList.add('active');
+                
+                if(btn.classList.contains('effect-blur')) {
+                    container.classList.add('blur-mode');
+                }
+
+                // 1 Second tak effect video recording ke liye locked rahega
+                setTimeout(() => {
+                    btn.classList.remove('active');
+                    if(btn.classList.contains('effect-blur')) {
+                        container.classList.remove('blur-mode');
+                    }
+                }, 1000);
+            });
+        });
+
+        // 8th Button: 3D Tilt Hover Lock Mechanism
+        const tiltCard = document.getElementById('tiltCard');
+        tiltCard.addEventListener('mouseenter', () => {
+            tiltCard.classList.add('active');
+            
+            // 3D Matrix tilt animation 1 second lock ke sath
+            tiltCard.style.transform = `perspective(300px) rotateX(-12deg) rotateY(12deg) scale(0.96)`;
+            tiltCard.style.background = "rgba(255, 255, 255, 0.75)";
+
+            setTimeout(() => {
+                tiltCard.classList.remove('active');
+                tiltCard.style.transform = `perspective(300px) rotateX(0deg) rotateY(0deg) scale(1)`;
+                tiltCard.style.background = "rgba(255, 255, 255, 0.45)";
+            }, 1000);
+        });
+    </script>
+
+</body>
+</html>
