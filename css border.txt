@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleek CSS Border UI Style Generator</title>
+    <style>
+        :root {
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --accent-glow: #00d2ff;
+            --text-main: #2d3748;
+            --text-muted: #718096;
+            --ui-borders: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        h1 {
+            color: var(--text-main);
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Compact Layout with soft light shadows */
+        .container {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 20px;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02);
+            max-width: 580px;
+            width: 100%;
+            border: 1px solid var(--ui-borders);
+        }
+
+        /* Left Side: Preview Section */
+        .preview-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 20px 15px;
+            min-height: 300px;
+            border: 1px solid var(--ui-borders);
+        }
+
+        .preview-box {
+            width: 140px;
+            height: 210px;
+            border: 9px solid var(--accent-glow);
+            border-radius: 8px;
+            transition: all 0.1s ease;
+            box-shadow: 0 10px 20px rgba(0, 210, 255, 0.15);
+            background: #ffffff;
+        }
+
+        .status-text {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .status-title {
+            font-weight: 700;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            text-transform: capitalize;
+        }
+
+        .status-desc {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Right Side: Controls Section */
+        .controls-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .style-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        /* Custom Scrollbar */
+        .style-buttons::-webkit-scrollbar {
+            width: 4px;
+        }
+        .style-buttons::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .style-btn {
+            background: #f8fafc;
+            border: 1px solid var(--ui-borders);
+            color: var(--text-main);
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .style-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .style-btn.active {
+            background: rgba(0, 210, 255, 0.08);
+            border-color: var(--accent-glow);
+            color: #008cb0;
+            font-weight: 600;
+        }
+
+        .sliders {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-group label {
+            width: 50px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .control-group input[type="range"] {
+            flex: 1;
+            accent-color: var(--accent-glow);
+            cursor: pointer;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            outline: none;
+        }
+
+        .value-display {
+            width: 35px;
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .color-picker-wrapper label {
+            width: 50px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        input[type="color"] {
+            -webkit-appearance: none;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: none;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 1px solid rgba(0,0,0,0.15);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>CSS Border UI Style</h1>
+
+    <div class="container">
+        <!-- Left Side: Preview -->
+        <div class="preview-section">
+            <div class="preview-box" id="previewBox"></div>
+            <div class="status-text">
+                <div class="status-title" id="statusTitle">solid</div>
+                <div class="status-desc" id="statusDesc">A continuous line</div>
+            </div>
+        </div>
+
+        <!-- Right Side: Controls -->
+        <div class="controls-section">
+            <div class="style-buttons">
+                <div class="style-btn active" data-style="solid" data-desc="A continuous line">solid</div>
+                <div class="style-btn" data-style="dashed" data-desc="Square dashes">dashed</div>
+                <div class="style-btn" data-style="dotted" data-desc="Round dots">dotted</div>
+                <div class="style-btn" data-style="double" data-desc="Two parallel lines">double</div>
+                <div class="style-btn" data-style="groove" data-desc="3D grooved look">groove</div>
+                <div class="style-btn" data-style="ridge" data-desc="3D ridged look">ridge</div>
+                <div class="style-btn" data-style="inset" data-desc="Sunken effect">inset</div>
+                <div class="style-btn" data-style="outset" data-desc="Raised effect">outset</div>
+                <div class="style-btn" data-style="none" data-desc="No border">none</div>
+                <div class="style-btn" data-style="hidden" data-desc="Hidden border">hidden</div>
+            </div>
+
+            <div class="sliders">
+                <div class="control-group">
+                    <label for="widthSlider">Width</label>
+                    <input type="range" id="widthSlider" min="0" max="30" value="9">
+                    <span class="value-display" id="widthVal">9px</span>
+                </div>
+
+                <div class="control-group">
+                    <label for="radiusSlider">Radius</label>
+                    <input type="range" id="radiusSlider" min="0" max="50" value="8">
+                    <span class="value-display" id="radiusVal">8px</span>
+                </div>
+
+                <div class="color-picker-wrapper">
+                    <label for="colorPicker">Color</label>
+                    <input type="color" id="colorPicker" value="#00d2ff">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const previewBox = document.getElementById('previewBox');
+        const statusTitle = document.getElementById('statusTitle');
+        const statusDesc = document.getElementById('statusDesc');
+        const widthSlider = document.getElementById('widthSlider');
+        const radiusSlider = document.getElementById('radiusSlider'); 
+        const colorPicker = document.getElementById('colorPicker');
+        
+        const widthVal = document.getElementById('widthVal');
+        const radiusVal = document.getElementById('radiusVal');
+        
+        const styleButtons = document.querySelectorAll('.style-btn');
+
+        // State Variables
+        let currentStyle = 'solid';
+        let currentWidth = 9;
+        let currentRadius = 8;
+        let currentColor = '#00d2ff';
+
+        // Update Function
+        function updateStyles() {
+            previewBox.style.borderStyle = currentStyle;
+            previewBox.style.borderWidth = `${currentWidth}px`;
+            previewBox.style.borderRadius = `${currentRadius}px`;
+            previewBox.style.borderColor = currentColor;
+            
+            // Dynamic subtle light glow based on selected color
+            previewBox.style.boxShadow = `0 10px 20px ${currentColor}25`; 
+
+            widthVal.textContent = `${currentWidth}px`;
+            radiusVal.textContent = `${currentRadius}px`;
+        }
+
+        // Button Click Event Listeners
+        styleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelector('.style-btn.active').classList.remove('active');
+                button.classList.add('active');
+                
+                currentStyle = button.getAttribute('data-style');
+                statusTitle.textContent = currentStyle;
+                statusDesc.textContent = button.getAttribute('data-desc');
+                
+                updateStyles();
+            });
+        });
+
+        // Sliders and Color Picker Listeners
+        widthSlider.addEventListener('input', (e) => {
+            currentWidth = e.target.value;
+            updateStyles();
+        });
+
+        radiusSlider.addEventListener('input', (e) => {
+            currentRadius = e.target.value;
+            updateStyles();
+        });
+
+        colorPicker.addEventListener('input', (e) => {
+            currentColor = e.target.value;
+            updateStyles();
+        });
+
+        // Initialize App
+        updateStyles();
+    </script>
+</body>
+</html>
