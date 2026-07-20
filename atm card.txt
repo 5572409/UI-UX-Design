@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtle 3D Payment Card with Liquid Input Fill</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #07090e;
+            padding: 20px;
+            overflow: hidden;
+            perspective: 1200px;
+        }
+
+        /* Ambient Background Glows */
+        .glow-1 {
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+            border-radius: 50%;
+            z-index: 1;
+            top: 15%; left: 25%;
+            animation: floatGlow 8s ease-in-out infinite alternate;
+        }
+
+        .glow-2 {
+            position: absolute;
+            width: 380px;
+            height: 380px;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+            border-radius: 50%;
+            z-index: 1;
+            bottom: 15%; right: 25%;
+            animation: floatGlow 10s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: scale(1) translate(-10px, -10px); }
+            100% { transform: scale(1.2) translate(10px, 10px); }
+        }
+
+        /* 3D Scene Wrapper */
+        .card-wrapper {
+            position: relative;
+            z-index: 2;
+            width: 350px;
+            height: 220px;
+            perspective: 1000px;
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.5s ease;
+        }
+
+        /* Flying Out Animation */
+        .card-wrapper.flying-out {
+            animation: flyToBox 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes flyToBox {
+            0% {
+                transform: scale(1) rotateX(0deg) rotateY(0deg) translateY(0);
+                opacity: 1;
+            }
+            40% {
+                transform: scale(0.8) rotateX(10deg) rotateY(-5deg) translateY(-30px) translateZ(50px);
+                opacity: 0.9;
+            }
+            100% {
+                transform: scale(0.1) rotateX(30deg) rotateY(20deg) translateY(400px) translateZ(-400px);
+                opacity: 0;
+            }
+        }
+
+        /* Spatial 3D Card Container (Controlled movement speed) */
+        .spatial-card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.2s ease-out; /* Smooth & realistic feel */
+        }
+
+        /* Front & Back Common Styles */
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.85) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.6),
+                inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            padding: 22px;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        /* 2-Second Scanning Light Beam Animation */
+        .scan-beam {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(99, 102, 241, 0.4),
+                rgba(16, 185, 129, 0.6),
+                transparent
+            );
+            transform: skewX(-25deg);
+            pointer-events: none;
+            z-index: 10;
+            opacity: 0;
+        }
+
+        .scanning .scan-beam {
+            opacity: 1;
+            animation: scanLight 2s linear forwards;
+        }
+
+        @keyframes scanLight {
+            0% { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        /* Card Elements */
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transform: translateZ(15px);
+        }
+
+        .chip {
+            width: 44px;
+            height: 32px;
+            background: linear-gradient(135deg, #fbbf24, #d97706);
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.3);
+        }
+
+        .top-right-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .cvv-trigger-btn {
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.4);
+            border-radius: 8px;
+            color: #818cf8;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cvv-trigger-btn:hover {
+            background: rgba(99, 102, 241, 0.3);
+            color: #fff;
+        }
+
+        .brand-logo {
+            font-size: 1.2rem;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            font-style: italic;
+            background: linear-gradient(90deg, #6366f1, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* LIQUID WATER FILL INPUT STYLES */
+        .input-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(15, 23, 42, 0.7);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Liquid Wave Element */
+        .liquid-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%; /* Dynamic fill based on text length */
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.6) 0%, rgba(99, 102, 241, 0.8) 100%);
+            transition: height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Liquid Wave Effect on Top Edge */
+        .liquid-fill::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: -50%;
+            width: 200%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 40%;
+            animation: liquidWave 2s infinite linear;
+        }
+
+        @keyframes liquidWave {
+            0% { transform: translateX(0) rotate(0deg); }
+            100% { transform: translateX(50%) rotate(360deg); }
+        }
+
+        .card-input {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            outline: none;
+            padding: 6px 10px;
+            font-weight: 600;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8); /* Ensures high readability over liquid */
+        }
+
+        .input-wrapper:focus-within {
+            border-color: #10b981;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .card-number-wrapper {
+            width: 100%;
+            transform: translateZ(20px);
+            margin: 6px 0;
+        }
+
+        .card-number-input {
+            font-size: 1.15rem;
+            letter-spacing: 2.5px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            transform: translateZ(20px);
+        }
+
+        .input-block {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .label {
+            font-size: 0.55rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 3px;
+            padding-left: 2px;
+        }
+
+        .holder-wrapper {
+            width: 175px;
+        }
+
+        .holder-input {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .expiry-wrapper {
+            width: 70px;
+        }
+
+        .expiry-input {
+            font-size: 0.85rem;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        /* Back Side */
+        .card-back {
+            transform: rotateY(180deg);
+            padding: 22px 0;
+        }
+
+        .magnetic-strip {
+            width: 100%;
+            height: 42px;
+            background: #000;
+            margin-top: 5px;
+        }
+
+        .cvv-container {
+            margin: 20px 22px 0 22px;
+            padding: 8px 12px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cvv-wrapper {
+            width: 65px;
+        }
+
+        .cvv-input {
+            color: #ffffff;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: 800;
+            font-size: 1.05rem;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+
+        /* Pay Button */
+        .pay-btn-container {
+            position: relative;
+            z-index: 10;
+            margin-top: 35px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pay-btn {
+            width: 350px;
+            padding: 14px;
+            background: linear-gradient(135deg, #6366f1 0%, #10b981 100%);
+            border: none;
+            border-radius: 14px;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pay-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .pay-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Success Popup */
+        .success-popup {
+            position: absolute;
+            z-index: 20;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            width: 320px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(16, 185, 129, 0.3);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .success-popup.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid #10b981;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto 15px auto;
+            color: #10b981;
+            font-size: 1.8rem;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .popup-title {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .popup-subtitle {
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-bottom: 18px;
+        }
+
+        .reset-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .perm-btn {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #94a3b8;
+            font-size: 0.75rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
+
+    <!-- 3D Spatial Card Container -->
+    <div class="card-wrapper" id="card-wrapper">
+        <div class="spatial-card" id="card">
+            
+            <!-- FRONT SIDE -->
+            <div class="card-face card-front" id="card-front">
+                <div class="scan-beam"></div>
+                <div class="card-top">
+                    <div class="chip"></div>
+                    <div class="top-right-group">
+                        <button type="button" class="cvv-trigger-btn" id="flip-to-cvv">CVV ↺</button>
+                        <div class="brand-logo">VISA</div>
+                    </div>
+                </div>
+
+                <!-- CARD NUMBER INPUT (WITH LIQUID FILL) -->
+                <div class="input-wrapper card-number-wrapper">
+                    <div class="liquid-fill" id="liquid-num"></div>
+                    <input 
+                        type="text" 
+                        id="card-number" 
+                        class="card-input card-number-input" 
+                        placeholder="•••• •••• •••• ••••" 
+                        maxlength="19" 
+                        autocomplete="off">
+                </div>
+
+                <div class="card-bottom">
+                    <!-- HOLDER NAME INPUT (WITH LIQUID FILL) -->
+                    <div class="input-block">
+                        <span class="label">Card Holder</span>
+                        <div class="input-wrapper holder-wrapper">
+                            <div class="liquid-fill" id="liquid-holder"></div>
+                            <input 
+                                type="text" 
+                                id="card-holder" 
+                                class="card-input holder-input" 
+                                placeholder="YOUR NAME" 
+                                maxlength="20" 
+                                autocomplete="off">
+                        </div>
+                    </div>
+
+                    <!-- EXPIRY INPUT (WITH LIQUID FILL) -->
+                    <div class="input-block">
+                        <span class="label">Expires</span>
+                        <div class="input-wrapper expiry-wrapper">
+                            <div class="liquid-fill" id="liquid-expiry"></div>
+                            <input 
+                                type="text" 
+                                id="card-expiry" 
+                                class="card-input expiry-input" 
+                                placeholder="MM/YY" 
+                                maxlength="5" 
+                                autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BACK SIDE -->
+            <div class="card-face card-back">
+                <div class="magnetic-strip"></div>
+                <div class="cvv-container">
+                    <span class="label" style="color: #10b981; margin: 0;">CVV / CVC</span>
+                    <div class="input-wrapper cvv-wrapper">
+                        <div class="liquid-fill" id="liquid-cvv"></div>
+                        <input 
+                            type="text" 
+                            id="card-cvv" 
+                            class="card-input cvv-input" 
+                            placeholder="•••" 
+                            maxlength="3" 
+                            autocomplete="off">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Pay Button & Controls -->
+    <div class="pay-btn-container">
+        <button type="button" class="pay-btn" id="pay-btn">
+            <span>Pay $120.00 Now</span>
+            <span style="font-size: 1.1rem;">➔</span>
+        </button>
+        <button class="perm-btn" id="enable-gyro">Enable Mobile 3D Gyro</button>
+    </div>
+
+    <!-- Payment Success Popup -->
+    <div class="success-popup" id="success-popup">
+        <div class="success-icon">✓</div>
+        <div class="popup-title">Payment Sent!</div>
+        <div class="popup-subtitle">Transaction processed and encrypted successfully.</div>
+        <button class="reset-btn" id="reset-btn">Make Another Payment</button>
+    </div>
+
+    <script>
+        const cardWrapper = document.getElementById('card-wrapper');
+        const card = document.getElementById('card');
+        const cardFront = document.getElementById('card-front');
+        const payBtn = document.getElementById('pay-btn');
+        const successPopup = document.getElementById('success-popup');
+        const resetBtn = document.getElementById('reset-btn');
+        const gyroBtn = document.getElementById('enable-gyro');
+        const flipBtn = document.getElementById('flip-to-cvv');
+
+        // Inputs & Liquid Fills
+        const inputNum = document.getElementById('card-number');
+        const liquidNum = document.getElementById('liquid-num');
+
+        const inputHolder = document.getElementById('card-holder');
+        const liquidHolder = document.getElementById('liquid-holder');
+
+        const inputExpiry = document.getElementById('card-expiry');
+        const liquidExpiry = document.getElementById('liquid-expiry');
+
+        const inputCvv = document.getElementById('card-cvv');
+        const liquidCvv = document.getElementById('liquid-cvv');
+
+        let isGyroActive = false;
+        let isFlipped = false;
+        let currentTiltX = 0;
+        let currentTiltY = 0;
+
+        // 1. Liquid Water Fill Calculation Function
+        function updateLiquidFill(inputElement, liquidElement, maxLength) {
+            let length = inputElement.value.length;
+            let percentage = (length / maxLength) * 100;
+            liquidElement.style.height = `${percentage}%`;
+        }
+
+        // 2. Input Listeners with Liquid Progress
+        inputNum.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\D/g, ''); 
+            let formatted = val.match(/.{1,4}/g)?.join(' ') || '';
+            e.target.value = formatted.substring(0, 19);
+            updateLiquidFill(inputNum, liquidNum, 19);
+        });
+
+        inputHolder.addEventListener('input', (e) => {
+            e.target.value = e.target.value.toUpperCase();
+            updateLiquidFill(inputHolder, liquidHolder, 20);
+        });
+
+        inputExpiry.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/\D/g, '');
+            if (val.length >= 3) {
+                e.target.value = val.substring(0, 2) + '/' + val.substring(2, 4);
+            } else {
+                e.target.value = val;
+            }
+            updateLiquidFill(inputExpiry, liquidExpiry, 5);
+        });
+
+        inputCvv.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+            updateLiquidFill(inputCvv, liquidCvv, 3);
+        });
+
+        // 3. Flip Controls
+        flipBtn.addEventListener('click', () => {
+            isFlipped = true;
+            update3DRotation();
+            setTimeout(() => inputCvv.focus(), 300);
+        });
+
+        inputCvv.addEventListener('focus', () => {
+            isFlipped = true;
+            update3DRotation();
+        });
+
+        inputCvv.addEventListener('blur', () => {
+            isFlipped = false;
+            update3DRotation();
+        });
+
+        // 4. Payment Trigger
+        payBtn.addEventListener('click', () => {
+            payBtn.disabled = true;
+            payBtn.innerHTML = `<span>Processing...</span>`;
+
+            cardFront.classList.add('scanning');
+
+            setTimeout(() => {
+                cardFront.classList.remove('scanning');
+                cardWrapper.classList.add('flying-out');
+
+                setTimeout(() => {
+                    successPopup.classList.add('show');
+                }, 800);
+
+            }, 2000);
+        });
+
+        // Reset Form
+        resetBtn.addEventListener('click', () => {
+            successPopup.classList.remove('show');
+            cardWrapper.classList.remove('flying-out');
+            payBtn.disabled = false;
+            payBtn.innerHTML = `<span>Pay $120.00 Now</span><span style="font-size: 1.1rem;">➔</span>`;
+            
+            // Clear inputs and liquid levels
+            inputNum.value = ''; liquidNum.style.height = '0%';
+            inputHolder.value = ''; liquidHolder.style.height = '0%';
+            inputExpiry.value = ''; liquidExpiry.style.height = '0%';
+            inputCvv.value = ''; liquidCvv.style.height = '0%';
+        });
+
+        // 5. Controlled 3D Motion (Very Subtle Angles)
+        function update3DRotation() {
+            let baseRotateY = isFlipped ? 180 : 0;
+            card.style.transform = `rotateX(${currentTiltX}deg) rotateY(${baseRotateY + currentTiltY}deg)`;
+        }
+
+        // Gyroscope & Hover Logic (Decreased tilt factor for subtle movement)
+        function handleOrientation(event) {
+            let x = event.beta;  
+            let y = event.gamma; 
+
+            if (x === null || y === null) return;
+
+            // Maximum +/- 6 degrees tilt for mobile gyro
+            currentTiltX = -Math.min(Math.max(x - 45, -6), 6);
+            currentTiltY = Math.min(Math.max(y, -6), 6);
+
+            isGyroActive = true;
+            update3DRotation();
+        }
+
+        async function requestGyroPermission() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try {
+                    const permissionState = await DeviceOrientationEvent.requestPermission();
+                    if (permissionState === 'granted') {
+                        window.addEventListener('deviceorientation', handleOrientation);
+                        gyroBtn.style.display = 'none';
+                    }
+                } catch (error) { console.error(error); }
+            } else if ('DeviceOrientationEvent' in window) {
+                window.addEventListener('deviceorientation', handleOrientation);
+                gyroBtn.style.display = 'none';
+            }
+        }
+
+        gyroBtn.addEventListener('click', requestGyroPermission);
+        if ('DeviceOrientationEvent' in window && typeof DeviceOrientationEvent.requestPermission !== 'function') {
+            window.addEventListener('deviceorientation', handleOrientation);
+            gyroBtn.style.display = 'none';
+        }
+
+        // Desktop Mouse Movement (Max 6 degrees rotation)
+        window.addEventListener('mousemove', (e) => {
+            if (isGyroActive) return;
+
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            // Reduced multiplier from 18/20 down to 6 for subtle hover movement
+            currentTiltX = ((e.clientY - centerY) / (rect.height / 2)) * -6;
+            currentTiltY = ((e.clientX - centerX) / (rect.width / 2)) * 6;
+
+            update3DRotation();
+        });
+
+        window.addEventListener('mouseleave', () => {
+            if (!isGyroActive) {
+                currentTiltX = 0;
+                currentTiltY = 0;
+                update3DRotation();
+            }
+        });
+    </script>
+</body>
+</html>
