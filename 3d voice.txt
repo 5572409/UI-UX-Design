@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compact 3D Audio Visualizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #e0e5ec;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        /* Ambient background glow */
+        .ambient-bg {
+            position: absolute;
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(45deg, #ff007f, #00f0ff);
+            filter: blur(80px);
+            border-radius: 50%;
+            z-index: 1;
+            opacity: 0.6;
+            animation: float 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes float {
+            0% { transform: translate(-80px, -80px) scale(1); }
+            100% { transform: translate(80px, 80px) scale(1.2); }
+        }
+
+        /* Compact Card Size (300px x 400px) */
+        .visualizer-card {
+            position: relative;
+            z-index: 2;
+            width: 300px;
+            height: 400px;
+            background: rgba(224, 229, 236, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 
+                15px 15px 40px #bebebe,
+                -15px -15px 40px #ffffff,
+                inset 1px 1px 2px rgba(255, 255, 255, 0.8);
+            transform-style: preserve-3d;
+            transition: transform 0.1s ease-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .header-title {
+            color: #444;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transform: translateZ(25px);
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
+        }
+
+        /* Status Box */
+        .track-info {
+            width: 100%;
+            height: 28px;
+            background: #e0e5ec;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 10px;
+            overflow: hidden;
+            box-shadow: 
+                inset 3px 3px 6px #b8b9be,
+                inset -3px -3px 6px #ffffff;
+            transform: translateZ(28px);
+        }
+
+        .track-name {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #555;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .recording-active {
+            color: #ff0055 !important;
+            animation: pulseText 1.2s infinite;
+        }
+
+        @keyframes pulseText {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* Compact Visualizer Screen */
+        .visualizer-container {
+            width: 100%;
+            height: 160px;
+            background: #e0e5ec;
+            border-radius: 16px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 4px;
+            padding: 15px 12px;
+            box-shadow: 
+                inset 6px 6px 12px #b8b9be,
+                inset -6px -6px 12px #ffffff;
+            transform: translateZ(30px);
+            transform-style: preserve-3d;
+        }
+
+        /* Audio Frequency Bars */
+        .bar {
+            flex: 1;
+            background: linear-gradient(180deg, #00f0ff, #7000ff);
+            height: 8px;
+            border-radius: 6px;
+            transition: height 0.05s ease-out;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+            transform-style: preserve-3d;
+            transform: translateZ(10px);
+        }
+
+        /* Controls Area */
+        .controls {
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            transform: translateZ(25px);
+        }
+
+        .btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: #e0e5ec;
+            box-shadow: 
+                5px 5px 10px #b8b9be,
+                -5px -5px 10px #ffffff;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            outline: none;
+            transition: all 0.2s ease;
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .btn:active {
+            box-shadow: 
+                inset 3px 3px 6px #b8b9be,
+                inset -3px -3px 6px #ffffff;
+            transform: scale(0.95);
+        }
+
+        .btn-play {
+            width: 56px;
+            height: 56px;
+            color: #00f0ff;
+            font-size: 1.1rem;
+        }
+
+        .btn-active {
+            box-shadow: 
+                inset 3px 3px 6px #b8b9be,
+                inset -3px -3px 6px #ffffff !important;
+            color: #ff0055 !important;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg"></div>
+
+    <div class="visualizer-card" id="card">
+        <div class="header-title">AUDIO VISUALIZER 3D</div>
+
+        <div class="track-info">
+            <span class="track-name" id="track-name">🎵 Select Music or Use Mic</span>
+        </div>
+
+        <div class="visualizer-container" id="visualizer">
+            <!-- 16 Frequency Bars -->
+        </div>
+
+        <div class="controls">
+            <label for="audio-upload" class="btn" title="Upload Audio File">
+                📁
+            </label>
+            <input type="file" id="audio-upload" accept="audio/*">
+
+            <button class="btn btn-play" id="play-btn" title="Play/Pause">
+                ▶
+            </button>
+
+            <button class="btn" id="mic-btn" title="Record Voice Audio">
+                🎙️
+            </button>
+        </div>
+    </div>
+
+    <audio id="audio-element"></audio>
+
+    <script>
+        const card = document.getElementById('card');
+        const visualizer = document.getElementById('visualizer');
+        const audioElement = document.getElementById('audio-element');
+        const playBtn = document.getElementById('play-btn');
+        const micBtn = document.getElementById('mic-btn');
+        const audioUpload = document.getElementById('audio-upload');
+        const trackName = document.getElementById('track-name');
+
+        const BAR_COUNT = 16;
+        const bars = [];
+
+        // 1. Generate Bars
+        for (let i = 0; i < BAR_COUNT; i++) {
+            const bar = document.createElement('div');
+            bar.classList.add('bar');
+            visualizer.appendChild(bar);
+            bars.push(bar);
+        }
+
+        // 2. 3D Tilt Interaction
+        function handleTilt(x, y) {
+            const rect = card.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+
+            const rotateX = ((y - centerY) / (rect.height / 2)) * -18;
+            const rotateY = ((x - centerX) / (rect.width / 2)) * 18;
+
+            card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+        }
+
+        window.addEventListener('mousemove', (e) => handleTilt(e.clientX, e.clientY));
+        window.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) handleTilt(e.touches[0].clientX, e.touches[0].clientY);
+        });
+        window.addEventListener('mouseleave', () => {
+            card.style.transform = `rotateX(0deg) rotateY(0deg)`;
+        });
+
+        // 3. Audio & Recording Engine
+        let audioCtx;
+        let analyser;
+        let source;
+        let micStream;
+        let isRecordingMic = false;
+        let isAudioPlaying = false;
+        let wavePhase = 0;
+
+        async function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 64;
+                analyser.smoothingTimeConstant = 0.7; // Faster response for live voice
+            }
+            if (audioCtx.state === 'suspended') {
+                await audioCtx.resume();
+            }
+        }
+
+        // Loop for Voice & Music Wave
+        function renderFrame() {
+            if (!isRecordingMic && !isAudioPlaying) return;
+            requestAnimationFrame(renderFrame);
+
+            if (analyser) {
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                analyser.getByteFrequencyData(dataArray);
+
+                wavePhase += 0.1;
+
+                for (let i = 0; i < BAR_COUNT; i++) {
+                    const realValue = dataArray[i] || 0;
+                    
+                    // High gain boost for Mic input so voice creates noticeable big waves
+                    let boostedVal = realValue * 2.8; 
+
+                    // Idle background wave animation so bars never stay completely dead/flat
+                    let idleWave = Math.sin(wavePhase + i * 0.4) * 8 + 10;
+                    
+                    let finalHeight = Math.max(boostedVal, idleWave);
+                    finalHeight = Math.min(finalHeight, 130); // Max container limit
+
+                    bars[i].style.height = `${finalHeight}px`;
+                    bars[i].style.transform = `translateZ(${10 + (finalHeight * 0.15)}px)`;
+                }
+            }
+        }
+
+        function stopAllSources() {
+            isRecordingMic = false;
+            isAudioPlaying = false;
+
+            if (audioElement && !audioElement.paused) {
+                audioElement.pause();
+            }
+
+            if (micStream) {
+                micStream.getTracks().forEach(track => track.stop());
+                micStream = null;
+            }
+
+            if (source) {
+                try { source.disconnect(); } catch (e) {}
+            }
+
+            playBtn.textContent = '▶';
+            micBtn.classList.remove('btn-active');
+            trackName.classList.remove('recording-active');
+
+            // Reset visualizer bars
+            bars.forEach(bar => {
+                bar.style.height = '8px';
+                bar.style.transform = 'translateZ(10px)';
+            });
+        }
+
+        // 4. Local Audio File Upload
+        audioUpload.addEventListener('change', async function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            await initAudioContext();
+            stopAllSources();
+
+            const cleanName = file.name.replace(/\.[^/.]+$/, "");
+            trackName.textContent = `🎶 ${cleanName}`;
+
+            const url = URL.createObjectURL(file);
+            audioElement.src = url;
+
+            source = audioCtx.createMediaElementSource(audioElement);
+            source.connect(analyser);
+            analyser.connect(audioCtx.destination);
+
+            audioElement.play();
+            playBtn.textContent = '⏸';
+            isAudioPlaying = true;
+            renderFrame();
+        });
+
+        // 5. Play / Pause Control
+        playBtn.addEventListener('click', async () => {
+            if (!audioElement.src) return;
+            await initAudioContext();
+
+            if (audioElement.paused) {
+                stopAllSources();
+                source = audioCtx.createMediaElementSource(audioElement);
+                source.connect(analyser);
+                analyser.connect(audioCtx.destination);
+
+                audioElement.play();
+                playBtn.textContent = '⏸';
+                isAudioPlaying = true;
+                renderFrame();
+            } else {
+                audioElement.pause();
+                playBtn.textContent = '▶';
+                isAudioPlaying = false;
+            }
+        });
+
+        // 6. Voice Recording Handler
+        micBtn.addEventListener('click', async () => {
+            if (isRecordingMic) {
+                stopAllSources();
+                trackName.textContent = '🎵 Select Music or Use Mic';
+            } else {
+                try {
+                    await initAudioContext();
+                    stopAllSources();
+
+                    micStream = await navigator.mediaDevices.getUserMedia({ 
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            autoGainControl: true
+                        }, 
+                        video: false 
+                    });
+
+                    source = audioCtx.createMediaStreamSource(micStream);
+                    source.connect(analyser);
+
+                    isRecordingMic = true;
+                    micBtn.classList.add('btn-active');
+                    trackName.textContent = '🔴 Recording Live Voice...';
+                    trackName.classList.add('recording-active');
+
+                    renderFrame();
+
+                } catch (err) {
+                    console.error("Mic Error:", err);
+                    alert("Microphone permission allow karein!");
+                }
+            }
+        });
+    </script>
+</body>
+</html>
