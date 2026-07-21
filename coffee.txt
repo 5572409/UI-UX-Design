@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Caramel Frappuccino Configurator</title>
+  <style>
+    :root {
+      --page: #ede9e2;
+      --page-glow: rgba(255,255,255,.78);
+      --card: rgba(250,248,244,.94);
+      --card-edge: rgba(39,31,24,.08);
+      --text: #1d1915;
+      --muted: #7e756c;
+      --line: rgba(48,39,31,.11);
+      --stage: #e7e0d6;
+      --stage-edge: rgba(82,64,48,.09);
+      --accent: #bc6d3e;
+      --accent-2: #df9b68;
+      --accent-soft: #f1d8c6;
+      --metal-hi: #f7f8f8;
+      --metal-mid: #aeb2b5;
+      --metal-low: #656a6f;
+      --machine-black: #171719;
+      --shadow: 0 28px 70px rgba(57,44,32,.16), 0 3px 10px rgba(57,44,32,.07);
+      color-scheme: light;
+    }
+
+    body.dark {
+      --page: #0d0c0b;
+      --page-glow: rgba(83,54,38,.16);
+      --card: rgba(23,21,19,.96);
+      --card-edge: rgba(255,255,255,.08);
+      --text: #f5f0e9;
+      --muted: #a99f94;
+      --line: rgba(255,255,255,.09);
+      --stage: #24201c;
+      --stage-edge: rgba(255,255,255,.06);
+      --accent: #e58d56;
+      --accent-2: #f1b386;
+      --accent-soft: #4d3021;
+      --shadow: 0 30px 90px rgba(0,0,0,.52), 0 1px 0 rgba(255,255,255,.04) inset;
+      color-scheme: dark;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 50% 18%, var(--page-glow), transparent 38%),
+        var(--page);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      transition: background-color .45s ease, color .35s ease;
+    }
+
+    button { font: inherit; }
+
+    .card {
+      width: min(100%, 420px);
+      border: 1px solid var(--card-edge);
+      border-radius: 32px;
+      padding: 18px;
+      overflow: hidden;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(24px);
+      transition: background .4s ease, border-color .4s ease, box-shadow .4s ease;
+    }
+
+    .topbar {
+      height: 44px;
+      display: grid;
+      grid-template-columns: 38px 1fr 38px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .icon-button {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      background: color-mix(in srgb, var(--card) 88%, transparent);
+      color: var(--text);
+      cursor: pointer;
+      transition: transform .18s ease, background .25s ease, color .25s ease;
+    }
+
+    .icon-button:hover { transform: translateY(-1px); background: var(--accent-soft); }
+    .icon-button:active { transform: scale(.94); }
+    .icon-button svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+
+    .title-wrap { text-align: center; line-height: 1.12; }
+    .kicker { margin: 0 0 4px; color: var(--muted); font-size: 9px; font-weight: 750; letter-spacing: .2em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: 15px; font-weight: 720; letter-spacing: -.02em; }
+
+    .stage {
+      position: relative;
+      height: 294px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border: 1px solid var(--stage-edge);
+      border-radius: 25px;
+      background:
+        radial-gradient(circle at 50% 88%, color-mix(in srgb, var(--accent) 15%, transparent), transparent 35%),
+        linear-gradient(145deg, color-mix(in srgb, var(--stage) 94%, white 6%), var(--stage));
+      transition: background .4s ease, border-color .4s ease;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      top: 9px;
+      border-radius: 50%;
+      border: 1px solid color-mix(in srgb, var(--text) 5%, transparent);
+      box-shadow: 0 0 0 27px color-mix(in srgb, var(--text) 1.8%, transparent);
+    }
+
+    .machine {
+      position: relative;
+      width: 276px;
+      height: 224px;
+      transform: translateY(4px);
+      filter: drop-shadow(0 18px 16px rgba(22,18,15,.18));
+    }
+
+    .machine-back {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 42px;
+      height: 139px;
+      border-radius: 22px 22px 9px 9px;
+      background:
+        linear-gradient(90deg,
+          var(--metal-low) 0%, var(--metal-hi) 9%, var(--metal-mid) 34%,
+          var(--metal-low) 48%, var(--metal-hi) 63%, var(--metal-mid) 92%, var(--metal-low) 100%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.86), inset 0 -10px 20px rgba(22,24,26,.17);
+    }
+
+    .machine-back::after {
+      content: "";
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      top: 45px;
+      bottom: 4px;
+      border-radius: 8px;
+      background: linear-gradient(110deg, rgba(255,255,255,.5), rgba(126,130,133,.1) 50%, rgba(255,255,255,.38));
+    }
+
+    .tower {
+      position: absolute;
+      z-index: 3;
+      left: 91px;
+      top: 27px;
+      width: 94px;
+      height: 159px;
+      border-radius: 20px 20px 12px 12px;
+      background: linear-gradient(95deg, #09090a, #252528 46%, #080809 100%);
+      box-shadow: inset 1px 0 rgba(255,255,255,.08), inset -1px 0 rgba(255,255,255,.05), 0 7px 16px rgba(0,0,0,.23);
+    }
+
+    .hopper {
+      position: absolute;
+      z-index: 4;
+      left: 101px;
+      top: 12px;
+      width: 74px;
+      height: 27px;
+      border-radius: 7px 7px 17px 17px;
+      background: linear-gradient(180deg, #2a2a2c 0 26%, #070708 31% 100%);
+      box-shadow: inset 0 2px 2px rgba(255,255,255,.22);
+    }
+
+    .display {
+      position: absolute;
+      top: 18px;
+      left: 13px;
+      width: 68px;
+      height: 40px;
+      border-radius: 9px;
+      background: #0d0e10;
+      border: 1px solid rgba(255,255,255,.07);
+      box-shadow: inset 0 0 13px rgba(0,0,0,.9);
+    }
+
+    .display::before {
+      content: "88°";
+      position: absolute;
+      left: 9px;
+      top: 7px;
+      color: #e8b184;
+      font: 700 9px/1 ui-monospace, monospace;
+      letter-spacing: .06em;
+      opacity: .9;
+    }
+
+    .display::after {
+      content: "READY";
+      position: absolute;
+      left: 9px;
+      bottom: 7px;
+      color: #7fe3a7;
+      font: 650 5px/1 ui-monospace, monospace;
+      letter-spacing: .14em;
+    }
+
+    .dial {
+      position: absolute;
+      z-index: 2;
+      top: 65px;
+      left: 34px;
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #2c2d2f 0 27%, #e4e5e5 29% 44%, #777b7e 46% 58%, #d9dcdd 60% 100%);
+      box-shadow: 0 2px 5px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.65);
+    }
+
+    .dial::after {
+      content: "";
+      position: absolute;
+      left: 12px;
+      top: -3px;
+      width: 3px;
+      height: 8px;
+      border-radius: 3px;
+      background: #121214;
+    }
+
+    .brew-head {
+      position: absolute;
+      left: 22px;
+      top: 103px;
+      width: 50px;
+      height: 13px;
+      border-radius: 4px 4px 9px 9px;
+      background: linear-gradient(#6b6e71, #151517 45%, #050506);
+      box-shadow: 0 3px 5px rgba(0,0,0,.3);
+    }
+
+    .spout {
+      position: absolute;
+      z-index: 5;
+      top: 112px;
+      width: 4px;
+      height: 17px;
+      border-radius: 0 0 3px 3px;
+      background: linear-gradient(90deg, #777, #ececec 45%, #555);
+    }
+
+    .spout.one { left: 124px; }
+    .spout.two { left: 148px; }
+
+    .stream {
+      position: absolute;
+      z-index: 7;
+      top: 140px;
+      width: 3px;
+      height: 68px;
+      border-radius: 0 0 999px 999px;
+      background: linear-gradient(180deg, #d99b65, #8c4828 80%, transparent);
+      transform-origin: top;
+      transform: scaleY(0);
+      opacity: 0;
+      filter: drop-shadow(0 0 3px rgba(221,139,81,.45));
+    }
+
+    .stream.one { left: 124px; }
+    .stream.two { left: 148px; animation-delay: .09s !important; }
+    .machine.pouring .stream { animation: pour-stream 2.55s ease-in-out forwards; }
+
+    @keyframes pour-stream {
+      0% { transform: scaleY(0); opacity: 0; }
+      9% { transform: scaleY(1); opacity: 1; }
+      84% { transform: scaleY(1); opacity: 1; }
+      100% { transform: scaleY(.3); opacity: 0; }
+    }
+
+    .steam-wand {
+      position: absolute;
+      z-index: 5;
+      left: 24px;
+      top: 92px;
+      width: 28px;
+      height: 60px;
+      border-left: 7px solid #171719;
+      border-bottom: 5px solid #171719;
+      border-radius: 0 0 0 12px;
+      transform: translateX(-12px);
+      box-shadow: inset 2px 0 rgba(255,255,255,.35);
+    }
+
+    .tray {
+      position: absolute;
+      z-index: 2;
+      left: 7px;
+      right: 7px;
+      bottom: 13px;
+      height: 37px;
+      border-radius: 9px 9px 19px 19px;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 11px, rgba(14,15,16,.68) 11px 14px),
+        linear-gradient(#aeb2b3, #3f4244 46%, #f1f1f1 51%, #777c7e 72%, #171819 100%);
+      border: 1px solid rgba(31,32,33,.65);
+      box-shadow: inset 0 1px rgba(255,255,255,.75), 0 7px 9px rgba(0,0,0,.18);
+    }
+
+    .cup-wrap {
+      --cup-w: 45px;
+      --cup-h: 62px;
+      position: absolute;
+      z-index: 6;
+      left: 50%;
+      bottom: 47px;
+      width: var(--cup-w);
+      height: var(--cup-h);
+      transform: translateX(-50%);
+      transition: width .5s cubic-bezier(.2,.8,.2,1), height .5s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .cup {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      clip-path: polygon(6% 0,94% 0,82% 100%,18% 100%);
+      background: linear-gradient(100deg, rgba(255,255,255,.45), rgba(255,255,255,.08) 38%, rgba(255,255,255,.25) 67%, rgba(255,255,255,.08));
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.42), inset 5px 0 9px rgba(255,255,255,.17), inset -4px 0 8px rgba(40,27,19,.12);
+    }
+
+    .cup::before {
+      content: "";
+      position: absolute;
+      z-index: 5;
+      left: 5%;
+      right: 5%;
+      top: 0;
+      height: 5px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.8);
+      background: rgba(255,255,255,.14);
+      box-shadow: 0 1px 2px rgba(45,28,18,.2);
+    }
+
+    .cup::after {
+      content: "";
+      position: absolute;
+      z-index: 6;
+      left: 19%;
+      top: 8%;
+      width: 12%;
+      height: 72%;
+      border-radius: 50%;
+      background: linear-gradient(rgba(255,255,255,.72), rgba(255,255,255,.03));
+      opacity: .65;
+      transform: rotate(2deg);
+    }
+
+    .liquid {
+      --fill: 0%;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: var(--fill);
+      background: linear-gradient(90deg, #723c22, #b8673a 35%, #d7915f 58%, #814326 100%);
+      transition: height 2.35s cubic-bezier(.2,.65,.2,1);
+      box-shadow: inset 5px 0 9px rgba(255,213,171,.14), inset -5px 0 10px rgba(52,22,10,.22);
+    }
+
+    .liquid::before {
+      content: "";
+      position: absolute;
+      left: -5%;
+      top: -4px;
+      width: 110%;
+      height: 9px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #a96339, #e1a475 55%, #7b3f24);
+      box-shadow: inset 0 2px 2px rgba(255,232,205,.35), 0 2px 3px rgba(56,24,12,.22);
+      animation: liquid-wave 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes liquid-wave { to { transform: translateY(1px) rotate(-1deg) scaleX(.96); } }
+
+    .foam {
+      position: absolute;
+      z-index: 3;
+      left: 7%;
+      right: 7%;
+      top: -2px;
+      height: 8px;
+      border-radius: 50%;
+      background: #e8c4a2;
+      opacity: 0;
+      transform: scale(.8);
+      transition: opacity .3s ease 2.05s, transform .4s ease 2s;
+    }
+
+    .cup-wrap.filled .liquid { --fill: 88%; }
+    .cup-wrap.filled .foam { opacity: .9; transform: scale(1); }
+
+    .machine-status {
+      position: absolute;
+      z-index: 8;
+      top: 14px;
+      right: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 9px;
+      font-weight: 750;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .machine-status i {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #5dcc8c;
+      box-shadow: 0 0 0 4px rgba(93,204,140,.12);
+    }
+
+    .details { padding: 18px 2px 0; }
+
+    .info-row {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      margin-bottom: 13px;
+    }
+
+    .label { margin: 0 0 3px; color: var(--muted); font-size: 10px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    .size-name { margin: 0; font-size: 17px; font-weight: 720; letter-spacing: -.025em; }
+    .price-wrap { text-align: right; }
+    .price { display: block; font-size: 22px; font-weight: 780; line-height: 1; letter-spacing: -.045em; }
+    .unit { display: block; min-height: 13px; margin-top: 5px; color: var(--muted); font-size: 10px; }
+
+    .sizes {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 5px;
+      margin-bottom: 17px;
+    }
+
+    .size-option {
+      min-width: 0;
+      height: 61px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 1px solid transparent;
+      border-radius: 15px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background .24s ease, border-color .24s ease, color .24s ease, transform .18s ease;
+    }
+
+    .size-option:hover { color: var(--text); background: color-mix(in srgb, var(--accent-soft) 45%, transparent); }
+    .size-option:active { transform: scale(.96); }
+    .size-option.active { color: var(--text); background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 22%, transparent); }
+    .size-option span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: 9px; font-weight: 720; white-space: nowrap; }
+
+    .cup-icon {
+      position: relative;
+      width: 16px;
+      height: var(--icon-h, 20px);
+      border: 1.5px solid currentColor;
+      border-top-width: 2px;
+      border-radius: 2px 2px 5px 5px;
+      clip-path: polygon(6% 0,94% 0,82% 100%,18% 100%);
+      opacity: .9;
+    }
+
+    .cup-icon::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      top: 5px;
+      height: 1px;
+      background: currentColor;
+      box-shadow: 0 4px currentColor;
+      opacity: .35;
+    }
+
+    .bottom-row { display: grid; grid-template-columns: 92px 1fr; align-items: center; gap: 12px; }
+
+    .quantity {
+      height: 49px;
+      display: grid;
+      grid-template-columns: 30px 32px 30px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--card) 65%, transparent);
+    }
+
+    .qty-btn {
+      width: 28px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      background: transparent;
+      color: var(--text);
+      font-size: 20px;
+      cursor: pointer;
+      transition: color .2s ease, transform .16s ease;
+    }
+    .qty-btn:hover { color: var(--accent); }
+    .qty-btn:active { transform: scale(.83); }
+    .qty { text-align: center; font-size: 14px; font-weight: 760; }
+
+    .fill-button {
+      position: relative;
+      height: 49px;
+      overflow: hidden;
+      border: 0;
+      border-radius: 16px;
+      background: var(--text);
+      color: var(--card);
+      cursor: pointer;
+      isolation: isolate;
+      box-shadow: 0 8px 20px color-mix(in srgb, var(--text) 17%, transparent);
+      transition: transform .18s ease, background .3s ease, color .3s ease, box-shadow .3s ease;
+    }
+
+    .fill-button:hover { transform: translateY(-1px); }
+    .fill-button:active { transform: scale(.98); }
+    .fill-button::before {
+      content: "";
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      transform: scaleX(0);
+      transform-origin: left;
+      border-radius: inherit;
+    }
+    .fill-button.filling::before { animation: button-fill 2.55s cubic-bezier(.2,.7,.2,1) forwards; }
+    .fill-button.ready { background: var(--accent); color: #fffaf5; box-shadow: 0 9px 24px color-mix(in srgb, var(--accent) 34%, transparent); }
+    .fill-button.ready::before { transform: scaleX(1); }
+    .fill-button:disabled { cursor: wait; }
+
+    @keyframes button-fill { to { transform: scaleX(1); } }
+
+    .button-content { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; font-weight: 760; letter-spacing: .01em; }
+    .button-content svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+    .button-content .loader { display: none; width: 13px; height: 13px; border: 2px solid rgba(255,255,255,.35); border-top-color: currentColor; border-radius: 50%; animation: spin .75s linear infinite; }
+    .fill-button.filling .loader { display: block; }
+    .fill-button.filling .cup-button-icon, .fill-button.filling .cart-button-icon { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      z-index: 20;
+      transform: translate(-50%, 18px);
+      padding: 11px 16px;
+      border-radius: 999px;
+      background: var(--text);
+      color: var(--card);
+      box-shadow: var(--shadow);
+      font-size: 11px;
+      font-weight: 720;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease, transform .25s ease;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    @media (max-width: 460px) {
+      body { padding: 10px; }
+      .card { border-radius: 26px; padding: 14px; }
+      .stage { height: 278px; }
+      .machine { transform: translateY(1px) scale(.94); }
+      .details { padding-top: 15px; }
+      .sizes { gap: 2px; }
+    }
+
+    @media (max-height: 700px) and (min-width: 340px) {
+      body { align-items: start; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="card" aria-label="Interactive coffee configurator">
+    <header class="topbar">
+      <button class="icon-button" id="themeToggle" aria-label="Switch to dark mode" title="Change theme">
+        <svg id="themeIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 14.6A8.5 8.5 0 0 1 9.4 3.6 8.5 8.5 0 1 0 20.4 14.6Z"/></svg>
+      </button>
+      <div class="title-wrap">
+        <p class="kicker">Signature Series</p>
+        <h1>Caramel Frappuccino</h1>
+      </div>
+      <button class="icon-button" id="cartButton" aria-label="Shopping bag" title="Shopping bag">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg>
+      </button>
+    </header>
+
+    <section class="stage" aria-label="Coffee machine animation">
+      <div class="machine-status"><i></i><span id="machineStatus">Ready</span></div>
+      <div class="machine" id="machine">
+        <div class="machine-back"></div>
+        <div class="steam-wand"></div>
+        <div class="hopper"></div>
+        <div class="tower"><div class="display"></div><div class="dial"></div><div class="brew-head"></div></div>
+        <span class="spout one"></span><span class="spout two"></span>
+        <span class="stream one"></span><span class="stream two"></span>
+        <div class="tray"></div>
+        <div class="cup-wrap" id="cupWrap">
+          <div class="cup"><div class="liquid"><span class="foam"></span></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="details">
+      <div class="info-row">
+        <div><p class="label">Size</p><p class="size-name" id="sizeName">Small</p></div>
+        <div class="price-wrap"><span class="price" id="price">$30.00</span><span class="unit" id="unitPrice">&nbsp;</span></div>
+      </div>
+
+      <div class="sizes" role="group" aria-label="Choose cup size">
+        <button class="size-option active" data-name="Small" data-price="30" data-width="45" data-height="62" aria-pressed="true"><i class="cup-icon" style="--icon-h:15px"></i><span>Small</span></button>
+        <button class="size-option" data-name="Medium" data-price="35" data-width="51" data-height="70" aria-pressed="false"><i class="cup-icon" style="--icon-h:18px"></i><span>Medium</span></button>
+        <button class="size-option" data-name="Large" data-price="40" data-width="58" data-height="79" aria-pressed="false"><i class="cup-icon" style="--icon-h:21px"></i><span>Large</span></button>
+        <button class="size-option" data-name="XLarge" data-price="45" data-width="65" data-height="88" aria-pressed="false"><i class="cup-icon" style="--icon-h:24px"></i><span>XLarge</span></button>
+        <button class="size-option" data-name="Custom" data-price="50" data-width="55" data-height="84" aria-pressed="false"><i class="cup-icon" style="--icon-h:20px"></i><span>Custom</span></button>
+      </div>
+
+      <div class="bottom-row">
+        <div class="quantity" aria-label="Quantity">
+          <button class="qty-btn" id="decrease" aria-label="Decrease quantity">−</button>
+          <span class="qty" id="quantity" aria-live="polite">1</span>
+          <button class="qty-btn" id="increase" aria-label="Increase quantity">+</button>
+        </div>
+        <button class="fill-button" id="fillButton">
+          <span class="button-content">
+            <svg class="cup-button-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h10l-1 15H7L6 5Z"/><path d="M5 5h12M8 9h6"/></svg>
+            <span class="loader" aria-hidden="true"></span>
+            <svg class="cart-button-icon" viewBox="0 0 24 24" aria-hidden="true" style="display:none"><path d="M4 5h2l2 10h9l2-7H7"/><circle cx="10" cy="19" r="1"/><circle cx="17" cy="19" r="1"/></svg>
+            <span id="buttonText">Tap to fill</span>
+          </span>
+        </button>
+      </div>
+    </section>
+  </main>
+  <div class="toast" id="toast" role="status" aria-live="polite">Added to your bag</div>
+
+  <script>
+    (() => {
+      const body = document.body;
+      const machine = document.getElementById('machine');
+      const cupWrap = document.getElementById('cupWrap');
+      const machineStatus = document.getElementById('machineStatus');
+      const sizeName = document.getElementById('sizeName');
+      const priceEl = document.getElementById('price');
+      const unitPriceEl = document.getElementById('unitPrice');
+      const quantityEl = document.getElementById('quantity');
+      const fillButton = document.getElementById('fillButton');
+      const buttonText = document.getElementById('buttonText');
+      const cupButtonIcon = document.querySelector('.cup-button-icon');
+      const cartButtonIcon = document.querySelector('.cart-button-icon');
+      const themeToggle = document.getElementById('themeToggle');
+      const themeIcon = document.getElementById('themeIcon');
+      const toast = document.getElementById('toast');
+      const sizeButtons = [...document.querySelectorAll('.size-option')];
+
+      let unitPrice = 30;
+      let quantity = 1;
+      let state = 'empty';
+      let fillTimer;
+      let toastTimer;
+
+      function money(value) { return `$${value.toFixed(2)}`; }
+
+      function updatePrice() {
+        priceEl.textContent = money(unitPrice * quantity);
+        unitPriceEl.innerHTML = quantity > 1 ? `${money(unitPrice)} × ${quantity}` : '&nbsp;';
+      }
+
+      function resetFill() {
+        clearTimeout(fillTimer);
+        state = 'empty';
+        machine.classList.remove('pouring');
+        cupWrap.classList.remove('filled');
+        fillButton.classList.remove('filling', 'ready');
+        fillButton.disabled = false;
+        buttonText.textContent = 'Tap to fill';
+        cupButtonIcon.style.display = '';
+        cartButtonIcon.style.display = 'none';
+        machineStatus.textContent = 'Ready';
+      }
+
+      sizeButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+          sizeButtons.forEach((item) => {
+            const active = item === button;
+            item.classList.toggle('active', active);
+            item.setAttribute('aria-pressed', String(active));
+          });
+          unitPrice = Number(button.dataset.price);
+          sizeName.textContent = button.dataset.name;
+          cupWrap.style.setProperty('--cup-w', `${button.dataset.width}px`);
+          cupWrap.style.setProperty('--cup-h', `${button.dataset.height}px`);
+          resetFill();
+          updatePrice();
+        });
+      });
+
+      document.getElementById('decrease').addEventListener('click', () => {
+        quantity = Math.max(1, quantity - 1);
+        quantityEl.textContent = quantity;
+        updatePrice();
+      });
+
+      document.getElementById('increase').addEventListener('click', () => {
+        quantity = Math.min(9, quantity + 1);
+        quantityEl.textContent = quantity;
+        updatePrice();
+      });
+
+      fillButton.addEventListener('click', () => {
+        if (state === 'ready') {
+          toast.classList.add('show');
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+          return;
+        }
+        if (state !== 'empty') return;
+
+        state = 'filling';
+        fillButton.disabled = true;
+        fillButton.classList.add('filling');
+        machine.classList.remove('pouring');
+        cupWrap.classList.remove('filled');
+        void machine.offsetWidth;
+        machine.classList.add('pouring');
+        cupWrap.classList.add('filled');
+        buttonText.textContent = 'Pouring…';
+        machineStatus.textContent = 'Brewing';
+
+        fillTimer = setTimeout(() => {
+          state = 'ready';
+          machine.classList.remove('pouring');
+          fillButton.classList.remove('filling');
+          fillButton.classList.add('ready');
+          fillButton.disabled = false;
+          buttonText.textContent = 'Add to cart';
+          cupButtonIcon.style.display = 'none';
+          cartButtonIcon.style.display = '';
+          machineStatus.textContent = 'Complete';
+        }, 2600);
+      });
+
+      themeToggle.addEventListener('click', () => {
+        const isDark = body.classList.toggle('dark');
+        themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        themeIcon.innerHTML = isDark
+          ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/>'
+          : '<path d="M20.4 14.6A8.5 8.5 0 0 1 9.4 3.6 8.5 8.5 0 1 0 20.4 14.6Z"/>';
+      });
+
+      document.getElementById('cartButton').addEventListener('click', () => {
+        toast.textContent = state === 'ready' ? 'Your drink is ready to add' : 'Fill your cup first';
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => { toast.textContent = 'Added to your bag'; }, 300);
+        }, 1600);
+      });
+
+      updatePrice();
+    })();
+  </script>
+</body>
+</html>
