@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#eeeae4">
+  <title>Custom Tee Studio</title>
+  <style>
+    :root{
+      --page:#eeeae4;--page-glow:rgba(255,255,255,.9);--card:rgba(251,250,247,.94);
+      --card-edge:rgba(40,34,28,.08);--text:#1c1a18;--muted:#7d766f;--line:rgba(43,37,31,.1);
+      --stage:#ebe5dc;--stage-edge:rgba(53,43,34,.07);--soft:#f1ebe3;--accent:#b85f3e;
+      --accent-2:#dd9673;--accent-rgb:184,95,62;--shirt:#17191b;--shirt-rgb:23,25,27;
+      --shirt-line:rgba(255,255,255,.16);--ink:#f7f3ea;--shadow:0 28px 75px rgba(62,49,37,.15),0 3px 12px rgba(62,49,37,.06);
+      color-scheme:light
+    }
+    body.dark{
+      --page:#0c0c0d;--page-glow:rgba(121,78,55,.16);--card:rgba(23,22,21,.96);
+      --card-edge:rgba(255,255,255,.08);--text:#f5f1eb;--muted:#a79f97;--line:rgba(255,255,255,.1);
+      --stage:#24211e;--stage-edge:rgba(255,255,255,.06);--soft:#312a25;--accent:#e57d55;
+      --accent-2:#f0ad83;--accent-rgb:229,125,85;--shadow:0 30px 90px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.025);color-scheme:dark
+    }
+    body[data-color="black"]{--shirt:#17191b;--shirt-rgb:23,25,27;--shirt-line:rgba(255,255,255,.16);--ink:#f7f3ea}
+    body[data-color="cream"]{--shirt:#eee6d7;--shirt-rgb:238,230,215;--shirt-line:rgba(72,60,50,.14);--ink:#3b342e}
+    body[data-color="sage"]{--shirt:#91a38c;--shirt-rgb:145,163,140;--shirt-line:rgba(35,55,39,.15);--ink:#f7f2e9}
+    *{box-sizing:border-box}
+    html,body{min-height:100%}
+    body{margin:0;display:grid;place-items:center;padding:18px;overflow-x:hidden;background:radial-gradient(circle at 50% 14%,var(--page-glow),transparent 39%),var(--page);color:var(--text);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;transition:background .45s ease,color .35s ease}
+    button{font:inherit}
+    .app{position:relative;width:min(100%,420px);border:1px solid var(--card-edge);border-radius:32px;padding:18px;overflow:hidden;background:var(--card);box-shadow:var(--shadow);backdrop-filter:blur(25px);transition:background .4s ease,border-color .4s ease,box-shadow .4s ease}
+    .topbar{height:44px;display:grid;grid-template-columns:38px 1fr 38px;align-items:center;margin-bottom:10px}
+    .icon-button{position:relative;width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;color:var(--text);background:color-mix(in srgb,var(--card) 80%,transparent);cursor:pointer;transition:transform .18s ease,background .25s ease,color .25s ease,border-color .25s ease}
+    .icon-button:hover{transform:translateY(-1px);background:var(--soft);border-color:rgba(var(--accent-rgb),.26)}.icon-button:active{transform:scale(.93)}
+    .icon-button svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .cart-badge{position:absolute;right:-3px;top:-3px;min-width:16px;height:16px;display:none;place-items:center;padding:0 4px;border:2px solid var(--card);border-radius:999px;color:#fff;background:var(--accent);font-size:8px;font-weight:850}.cart-badge.show{display:grid}
+    .cart-button.receive{animation:cart-receive .55s cubic-bezier(.2,.8,.2,1)}@keyframes cart-receive{45%{transform:scale(1.18) rotate(-8deg)}75%{transform:scale(.92) rotate(4deg)}}
+    .title-wrap{text-align:center;line-height:1.12}.kicker{margin:0 0 4px;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}h1{margin:0;font-size:15px;font-weight:780;letter-spacing:-.025em}
+
+    .stage{position:relative;height:282px;display:grid;place-items:center;overflow:hidden;border:1px solid var(--stage-edge);border-radius:25px;background:radial-gradient(circle at 50% 69%,rgba(var(--shirt-rgb),.12),transparent 38%),linear-gradient(145deg,color-mix(in srgb,var(--stage) 94%,white 6%),var(--stage));transition:background .48s ease,border-color .4s ease}
+    .stage:before{content:"";position:absolute;width:245px;height:245px;border:1px solid color-mix(in srgb,var(--text) 5%,transparent);border-radius:50%;box-shadow:0 0 0 28px color-mix(in srgb,var(--text) 1.6%,transparent)}
+    .status{position:absolute;z-index:12;top:14px;right:15px;display:flex;align-items:center;gap:6px;color:var(--muted);font-size:8px;font-weight:820;letter-spacing:.12em;text-transform:uppercase}.status i{width:6px;height:6px;border-radius:50%;background:#a5a5a4;box-shadow:0 0 0 4px rgba(145,145,145,.1);transition:.25s}.status.processing i{background:#e9a042;box-shadow:0 0 0 4px rgba(233,160,66,.14);animation:pulse .8s ease infinite}.status.ready i{background:#5ccb8b;box-shadow:0 0 0 4px rgba(92,203,139,.13)}@keyframes pulse{50%{opacity:.42;transform:scale(.72)}}
+    .product-visual{position:relative;z-index:4;width:260px;height:238px;display:grid;place-items:center;transform:translateY(7px);transition:transform .38s cubic-bezier(.2,.8,.2,1),opacity .35s ease,filter .4s ease}
+    .product-visual.ordering{transform:translateY(7px) scale(.96)}.product-visual.departing{opacity:.08;transform:translateY(2px) scale(.72);filter:blur(5px)}
+    .shirt-svg{width:238px;height:220px;overflow:visible;filter:drop-shadow(0 19px 14px rgba(29,24,20,.17))}
+    .shirt-base{fill:var(--shirt);transition:fill .32s ease}.shirt-edge{fill:none;stroke:var(--shirt-line);stroke-width:1.4;transition:stroke .32s ease}.shirt-seam{fill:none;stroke:var(--shirt-line);stroke-width:1;stroke-dasharray:2.4 2.6;transition:stroke .32s ease}.collar-shadow{fill:color-mix(in srgb,var(--shirt) 77%,black 23%);transition:fill .32s ease}.collar-rib{fill:none;stroke:var(--shirt-line);stroke-width:4;transition:stroke .32s ease}
+    .chest-mark{fill:var(--ink);transition:fill .32s ease}.mark-line{stroke:var(--ink);transition:stroke .32s ease}
+    .texture-layer{pointer-events:none;opacity:0;transition:opacity .34s ease}.cotton-texture{fill:url(#cottonPattern)}.silk-texture{fill:url(#silkGradient)}.linen-texture{fill:url(#linenPattern)}
+    body[data-fabric="cotton"] .cotton-texture{opacity:.22}body[data-fabric="silk"] .silk-texture{opacity:.38}body[data-fabric="linen"] .linen-texture{opacity:.3}
+    .silk-highlight{opacity:0;fill:url(#silkShine);transition:opacity .34s ease}body[data-fabric="silk"] .silk-highlight{opacity:.42}
+    .shimmer-sweep{opacity:0;fill:url(#shimmerGradient);transform:translateX(-280px) skewX(-16deg)}.product-visual.changing .shimmer-sweep{opacity:1;animation:shirt-shimmer .72s cubic-bezier(.36,.04,.2,1)}
+    @keyframes shirt-shimmer{0%{transform:translateX(-280px) skewX(-16deg);opacity:0}18%{opacity:.72}75%{opacity:.72}100%{transform:translateX(310px) skewX(-16deg);opacity:0}}
+    .fabric-tag{position:absolute;z-index:6;left:18px;bottom:16px;display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;color:var(--muted);background:color-mix(in srgb,var(--card) 64%,transparent);backdrop-filter:blur(9px);font-size:8px;font-weight:760}.fabric-tag i{width:7px;height:7px;border-radius:2px;background:var(--shirt);box-shadow:0 0 0 1px var(--shirt-line);transition:background .3s ease}
+    .view-hint{position:absolute;z-index:6;right:16px;bottom:17px;color:var(--muted);font-size:8px;font-weight:720;letter-spacing:.08em;text-transform:uppercase}
+
+    .details{padding:14px 2px 0}.info-row{display:flex;align-items:end;justify-content:space-between;margin-bottom:10px}.label{margin:0 0 3px;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.selection-name{margin:0;font-size:16px;font-weight:780;letter-spacing:-.025em}.price-wrap{text-align:right}.price{display:block;font-size:22px;font-weight:820;line-height:1;letter-spacing:-.05em;transition:transform .25s ease,color .25s ease}.price.bump{color:var(--accent);animation:price-bump .35s cubic-bezier(.2,.8,.2,1)}@keyframes price-bump{50%{transform:scale(1.12)}}.price-note{display:block;margin-top:4px;color:var(--muted);font-size:8px}
+    .section-label{display:flex;align-items:center;justify-content:space-between;margin:0 1px 6px;color:var(--muted);font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.section-label span:last-child{font-weight:700;letter-spacing:0;text-transform:none}
+    .fabric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}.fabric-option{position:relative;height:55px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:0 10px;border:1px solid var(--line);border-radius:13px;color:var(--muted);background:transparent;text-align:left;cursor:pointer;overflow:hidden;transition:.22s}.fabric-option:before{content:"";position:absolute;right:-15px;bottom:-25px;width:50px;height:50px;border-radius:50%;background:var(--accent);filter:blur(20px);opacity:0;transition:.3s}.fabric-option:hover{color:var(--text);transform:translateY(-1px);border-color:rgba(var(--accent-rgb),.28)}.fabric-option:active{transform:scale(.97)}.fabric-option.active{color:var(--text);border-color:rgba(var(--accent-rgb),.3);background:var(--soft)}.fabric-option.active:before{opacity:.13}.fabric-option b{position:relative;z-index:1;font-size:9px}.fabric-option span{position:relative;z-index:1;margin-top:4px;font-size:8px}.fabric-option .check{position:absolute;right:8px;top:7px;width:13px;height:13px;display:grid;place-items:center;border-radius:50%;color:#fff;background:var(--accent);font-size:8px;font-style:normal;font-weight:900;opacity:0;transform:scale(.5);transition:.22s}.fabric-option.active .check{opacity:1;transform:scale(1)}
+    .color-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.color-option{height:37px;display:flex;align-items:center;gap:7px;min-width:0;padding:0 8px;border:1px solid var(--line);border-radius:11px;color:var(--muted);background:transparent;cursor:pointer;transition:.22s}.color-option:hover{color:var(--text);border-color:color-mix(in srgb,var(--swatch) 45%,var(--line))}.color-option:active{transform:scale(.97)}.color-option.active{color:var(--text);background:var(--soft);border-color:rgba(var(--accent-rgb),.25)}.swatch{position:relative;flex:0 0 auto;width:17px;height:17px;border:1px solid rgba(22,22,22,.15);border-radius:50%;background:var(--swatch);box-shadow:inset 0 1px rgba(255,255,255,.34)}.color-option.active .swatch:after{content:"";position:absolute;inset:-4px;border:1px solid var(--accent);border-radius:50%}.color-option span:last-child{overflow:hidden;font-size:7.5px;font-weight:760;white-space:nowrap;text-overflow:ellipsis}
+    .order-button{position:relative;width:100%;height:50px;margin-top:11px;overflow:hidden;border:0;border-radius:16px;color:var(--card);background:var(--text);cursor:pointer;isolation:isolate;box-shadow:0 9px 22px color-mix(in srgb,var(--text) 17%,transparent);transition:transform .2s ease,box-shadow .3s ease,background .3s ease}.order-button:hover{transform:translateY(-1px)}.order-button:active{transform:scale(.985)}.order-button:disabled{cursor:wait}.order-button:before{content:"";position:absolute;z-index:-2;inset:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));opacity:0;transition:opacity .25s}.order-button.processing:before,.order-button.ready:before{opacity:1}.button-progress{position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(255,255,255,.02),rgba(255,255,255,.25));transform:scaleX(0);transform-origin:left}.order-button.processing .button-progress{animation:progress 3.7s linear forwards}.order-button.ready{color:#fff;background:var(--accent);box-shadow:0 9px 24px rgba(var(--accent-rgb),.34)}@keyframes progress{to{transform:scaleX(1)}}
+    .button-content{position:relative;z-index:2;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:11px;font-weight:800}.button-content svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.loader{display:none;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .75s linear infinite}.order-button.processing .loader{display:block}.order-button.processing .hanger-icon{display:none}@keyframes spin{to{transform:rotate(360deg)}}
+    .fly-shirt{position:fixed;z-index:1000;display:grid;place-items:center;pointer-events:none;transform-origin:center;transition:transform .9s cubic-bezier(.55,.02,.2,1),opacity .82s ease,filter .82s ease}.fly-shirt .fabric-tag,.fly-shirt .view-hint{display:none}.fly-shirt .shirt-svg{width:100%;height:100%;filter:drop-shadow(0 10px 10px rgba(0,0,0,.18))}
+    .toast{position:fixed;left:50%;bottom:24px;z-index:70;max-width:calc(100% - 30px);transform:translate(-50%,18px);padding:11px 16px;border-radius:999px;color:var(--card);background:var(--text);box-shadow:var(--shadow);font-size:10px;font-weight:780;opacity:0;pointer-events:none;white-space:nowrap;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .cart-modal{position:fixed;z-index:80;inset:0;display:grid;place-items:center;padding:18px;background:rgba(17,14,12,.38);backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:.25s}.cart-modal.open{opacity:1;pointer-events:auto}.cart-sheet{width:min(100%,360px);padding:22px;border:1px solid var(--card-edge);border-radius:24px;background:var(--card);box-shadow:var(--shadow);transform:translateY(15px) scale(.97);transition:.25s}.cart-modal.open .cart-sheet{transform:none}.cart-head{display:flex;align-items:center;justify-content:space-between}.cart-head h2{margin:0;font-size:18px}.close-btn{width:32px;height:32px;border:1px solid var(--line);border-radius:50%;color:var(--text);background:transparent;cursor:pointer}.cart-empty{padding:30px 0;color:var(--muted);text-align:center;font-size:11px}.cart-item{display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:11px;margin-top:17px;padding:12px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--stage) 55%,transparent)}.mini-shirt{width:38px;height:38px;display:grid;place-items:center;border-radius:10px;background:var(--soft)}.mini-shirt svg{width:27px;height:27px;fill:var(--ordered-color,#17191b)}.cart-copy b{display:block;font-size:11px}.cart-copy span{display:block;margin-top:3px;color:var(--muted);font-size:8px}.cart-price{font-size:12px;font-weight:820}
+    @media(max-width:460px){body{padding:10px}.app{padding:14px;border-radius:27px}.stage{height:268px}.product-visual{transform:translateY(5px) scale(.95)}.product-visual.ordering{transform:translateY(5px) scale(.92)}.fabric-option{padding-left:8px}.color-option{padding:0 6px;gap:6px}.color-option span:last-child{font-size:7px}}
+    @media(max-height:780px) and (min-width:340px){body{align-items:start}.stage{height:248px}.product-visual{transform:translateY(2px) scale(.89)}.details{padding-top:11px}.fabric-option{height:50px}.order-button{height:47px}}
+    @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+  </style>
+</head>
+<body data-color="black" data-fabric="cotton">
+  <main class="app" aria-label="Custom apparel configurator">
+    <header class="topbar">
+      <button class="icon-button" id="themeToggle" aria-label="Switch to dark mode" title="Change theme"><svg id="themeIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 14.6A8.5 8.5 0 0 1 9.4 3.6 8.5 8.5 0 1 0 20.4 14.6Z"/></svg></button>
+      <div class="title-wrap"><p class="kicker">Made For You</p><h1>Custom Tee Studio</h1></div>
+      <button class="icon-button cart-button" id="cartButton" aria-label="Custom order cart" title="View custom order"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8Z"/><path d="M9 9V6a3 3 0 0 1 6 0v3"/></svg><span class="cart-badge" id="cartBadge">0</span></button>
+    </header>
+
+    <section class="stage" aria-label="Live custom T-shirt preview">
+      <div class="status" id="statusWrap"><i></i><span id="statusText">READY TO CUSTOMIZE</span></div>
+      <div class="product-visual" id="productVisual">
+        <svg class="shirt-svg" viewBox="0 0 256 242" role="img" aria-labelledby="shirtTitle shirtDesc">
+          <title id="shirtTitle">Custom T-shirt preview</title><desc id="shirtDesc">A front view T-shirt that updates with the selected fabric and color.</desc>
+          <defs>
+            <path id="shirtShape" d="M94 38c9 8 20 12 34 12s25-4 34-12l38 16 27 43-31 19-17-26v121c-28 9-74 9-102 0V90l-17 26-31-19 27-43z"/>
+            <clipPath id="shirtClip"><use href="#shirtShape"/></clipPath>
+            <pattern id="cottonPattern" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".7" fill="#fff"/><circle cx="4" cy="3.5" r=".5" fill="#000"/></pattern>
+            <pattern id="linenPattern" width="7" height="7" patternUnits="userSpaceOnUse"><path d="M0 1h7M0 5h7M1 0v7M5 0v7" stroke="#fff" stroke-width=".45" opacity=".9"/></pattern>
+            <linearGradient id="silkGradient" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".05"/><stop offset=".42" stop-color="#fff" stop-opacity=".7"/><stop offset=".58" stop-color="#fff" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>
+            <linearGradient id="silkShine" x1="0" y1="0" x2="1" y2="0"><stop offset=".1" stop-color="#fff" stop-opacity="0"/><stop offset=".47" stop-color="#fff" stop-opacity=".65"/><stop offset=".72" stop-color="#fff" stop-opacity="0"/></linearGradient>
+            <linearGradient id="shimmerGradient" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".15"/><stop offset=".53" stop-color="#fff" stop-opacity=".92"/><stop offset=".62" stop-color="#fff" stop-opacity=".18"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+          </defs>
+          <use href="#shirtShape" class="shirt-base"/>
+          <use href="#shirtShape" class="texture-layer cotton-texture"/>
+          <use href="#shirtShape" class="texture-layer silk-texture"/>
+          <use href="#shirtShape" class="texture-layer linen-texture"/>
+          <path class="silk-highlight" clip-path="url(#shirtClip)" d="M70 29h64l-38 194H42z"/>
+          <path class="collar-shadow" d="M94 38c7 23 61 23 68 0l-13-6c-8 5-34 5-42 0z"/>
+          <path class="collar-rib" d="M103 35c4 18 46 18 50 0"/>
+          <use href="#shirtShape" class="shirt-edge"/>
+          <path class="shirt-seam" d="M58 56l26 16-7 18m121-34-26 16 7 18M78 197c29 7 71 7 100 0"/>
+          <g aria-hidden="true"><path class="mark-line" d="M111 105h34" stroke-width="1" opacity=".55"/><text class="chest-mark" x="128" y="121" text-anchor="middle" font-size="8" font-weight="800" letter-spacing="1.8">CUSTOM</text><text class="chest-mark" x="128" y="132" text-anchor="middle" font-size="5" font-weight="700" letter-spacing="1.1" opacity=".7">EDITION 01</text></g>
+          <g clip-path="url(#shirtClip)"><rect class="shimmer-sweep" x="0" y="0" width="115" height="242"/></g>
+        </svg>
+        <div class="fabric-tag"><i></i><span id="fabricTag">Cotton · Matte Black</span></div>
+        <span class="view-hint">Front View</span>
+      </div>
+    </section>
+
+    <section class="details">
+      <div class="info-row"><div><p class="label">Your configuration</p><p class="selection-name" id="selectionName">Cotton Essential</p></div><div class="price-wrap"><span class="price" id="price">$29</span><span class="price-note">Custom order total</span></div></div>
+      <div class="section-label"><span>Fabric Type</span><span id="fabricHint">Soft everyday weave</span></div>
+      <div class="fabric-grid" role="group" aria-label="Choose fabric type">
+        <button class="fabric-option active" data-fabric="cotton" data-name="Cotton" data-title="Cotton Essential" data-price="29" data-hint="Soft everyday weave" aria-pressed="true"><i class="check">✓</i><b>Cotton</b><span>$29</span></button>
+        <button class="fabric-option" data-fabric="silk" data-name="Silk" data-title="Silk Signature" data-price="49" data-hint="Smooth premium sheen" aria-pressed="false"><i class="check">✓</i><b>Silk</b><span>$49</span></button>
+        <button class="fabric-option" data-fabric="linen" data-name="Linen" data-title="Linen Air" data-price="39" data-hint="Breathable woven feel" aria-pressed="false"><i class="check">✓</i><b>Linen</b><span>$39</span></button>
+      </div>
+      <div class="section-label"><span>Color</span><span id="colorLabel">Matte Black</span></div>
+      <div class="color-row" role="group" aria-label="Choose T-shirt color">
+        <button class="color-option active" style="--swatch:#17191b" data-color="black" data-name="Matte Black" aria-label="Matte Black" aria-pressed="true"><i class="swatch"></i><span>Matte Black</span></button>
+        <button class="color-option" style="--swatch:#eee6d7" data-color="cream" data-name="Cream White" aria-label="Cream White" aria-pressed="false"><i class="swatch"></i><span>Cream White</span></button>
+        <button class="color-option" style="--swatch:#91a38c" data-color="sage" data-name="Sage Green" aria-label="Sage Green" aria-pressed="false"><i class="swatch"></i><span>Sage Green</span></button>
+      </div>
+      <button class="order-button" id="orderButton"><span class="button-progress" aria-hidden="true"></span><span class="button-content"><svg class="hanger-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7a2.5 2.5 0 1 0-2.5-2.5M12 7l8 7v2H4v-2z"/></svg><span class="loader" aria-hidden="true"></span><span id="buttonText">Add to Custom Order · $29</span></span></button>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Custom T-shirt added</div>
+  <div class="cart-modal" id="cartModal" role="dialog" aria-modal="true" aria-labelledby="cartTitle"><div class="cart-sheet"><div class="cart-head"><h2 id="cartTitle">Your custom order</h2><button class="close-btn" id="closeCart" aria-label="Close cart">×</button></div><div id="cartContent"><div class="cart-empty">Your custom cart is empty.</div></div></div></div>
+
+  <script>
+    (()=>{
+      const body=document.body,product=document.getElementById('productVisual'),priceEl=document.getElementById('price'),selectionName=document.getElementById('selectionName'),fabricHint=document.getElementById('fabricHint'),fabricTag=document.getElementById('fabricTag'),colorLabel=document.getElementById('colorLabel'),button=document.getElementById('orderButton'),buttonText=document.getElementById('buttonText'),statusWrap=document.getElementById('statusWrap'),statusText=document.getElementById('statusText'),cartButton=document.getElementById('cartButton'),cartBadge=document.getElementById('cartBadge'),toast=document.getElementById('toast'),cartModal=document.getElementById('cartModal'),cartContent=document.getElementById('cartContent');
+      const fabricButtons=[...document.querySelectorAll('.fabric-option')],colorButtons=[...document.querySelectorAll('.color-option')];
+      let fabric={key:'cotton',name:'Cotton',title:'Cotton Essential',price:29,hint:'Soft everyday weave'},color={key:'black',name:'Matte Black'},state='idle',timers=[],changeTimers=[],toastTimer,lastOrder=null,cartCount=0;
+      const colorHex={black:'#17191b',cream:'#eee6d7',sage:'#91a38c'};
+      function setStatus(text,type=''){statusText.textContent=text;statusWrap.className=`status ${type}`}
+      function clearTimers(list){list.forEach(clearTimeout);list.length=0}
+      function flash(text){toast.textContent=text;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),1900)}
+      function bumpPrice(){priceEl.classList.remove('bump');void priceEl.offsetWidth;priceEl.classList.add('bump')}
+      function refreshUI(){priceEl.textContent=`$${fabric.price}`;selectionName.textContent=fabric.title;fabricHint.textContent=fabric.hint;fabricTag.textContent=`${fabric.name} · ${color.name}`;colorLabel.textContent=color.name;buttonText.textContent=`Add to Custom Order · $${fabric.price}`;bumpPrice()}
+      function shimmer(apply){clearTimers(changeTimers);product.classList.remove('changing');void product.offsetWidth;product.classList.add('changing');changeTimers.push(setTimeout(apply,245));changeTimers.push(setTimeout(()=>product.classList.remove('changing'),730))}
+      function resetOrder(){clearTimers(timers);state='idle';product.classList.remove('ordering','departing');button.classList.remove('processing','ready');button.disabled=false;setStatus('READY TO CUSTOMIZE');refreshUI();[...fabricButtons,...colorButtons].forEach(el=>el.disabled=false)}
+      function flyToCart(){
+        const source=product.getBoundingClientRect(),target=cartButton.getBoundingClientRect(),clone=product.cloneNode(true);clone.removeAttribute('id');clone.className='fly-shirt';clone.style.left=`${source.left}px`;clone.style.top=`${source.top}px`;clone.style.width=`${source.width}px`;clone.style.height=`${source.height}px`;document.body.appendChild(clone);product.classList.add('departing');
+        const dx=target.left+target.width/2-(source.left+source.width/2),dy=target.top+target.height/2-(source.top+source.height/2);requestAnimationFrame(()=>requestAnimationFrame(()=>{clone.style.transform=`translate(${dx}px,${dy}px) scale(.1) rotate(9deg)`;clone.style.opacity='0';clone.style.filter='blur(2px)'}));
+        setTimeout(()=>{clone.remove();cartButton.classList.add('receive');cartBadge.textContent=String(++cartCount);cartBadge.classList.add('show');setTimeout(()=>cartButton.classList.remove('receive'),600)},860)
+      }
+      function addOrder(){
+        if(state==='processing')return;if(state==='ready'){resetOrder();return}state='processing';clearTimers(timers);button.disabled=true;button.classList.remove('ready');void button.offsetWidth;button.classList.add('processing');product.classList.add('ordering');[...fabricButtons,...colorButtons].forEach(el=>el.disabled=true);setStatus('PROCESSING ORDER...','processing');buttonText.textContent='✂ Tailoring Fabric...';
+        timers.push(setTimeout(()=>buttonText.textContent='📦 Quality Check...',1450));
+        timers.push(setTimeout(()=>{buttonText.textContent='Preparing your package...';flyToCart()},2700));
+        timers.push(setTimeout(()=>{state='ready';lastOrder={fabric:fabric.name,color:color.name,price:fabric.price,colorHex:colorHex[color.key]};renderCart();button.classList.remove('processing');button.classList.add('ready');button.disabled=false;buttonText.textContent='✓ Ready to Ship';setStatus('ORDER READY','ready');product.classList.remove('ordering','departing');[...fabricButtons,...colorButtons].forEach(el=>el.disabled=false);flash('Custom T-shirt is ready to ship')},3700))
+      }
+      fabricButtons.forEach(btn=>btn.addEventListener('click',()=>{if(state==='processing')return;fabricButtons.forEach(item=>{const active=item===btn;item.classList.toggle('active',active);item.setAttribute('aria-pressed',String(active))});shimmer(()=>{fabric={key:btn.dataset.fabric,name:btn.dataset.name,title:btn.dataset.title,price:Number(btn.dataset.price),hint:btn.dataset.hint};body.dataset.fabric=fabric.key;resetOrder()})}));
+      colorButtons.forEach(btn=>btn.addEventListener('click',()=>{if(state==='processing')return;colorButtons.forEach(item=>{const active=item===btn;item.classList.toggle('active',active);item.setAttribute('aria-pressed',String(active))});shimmer(()=>{color={key:btn.dataset.color,name:btn.dataset.name};body.dataset.color=color.key;resetOrder()})}));
+      button.addEventListener('click',addOrder);
+      function renderCart(){if(!lastOrder){cartContent.innerHTML='<div class="cart-empty">Your custom cart is empty.</div>';return}cartContent.innerHTML=`<div class="cart-item"><div class="mini-shirt" style="--ordered-color:${lastOrder.colorHex}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4c2 2 6 2 8 0l4 2 3 5-4 2-1-2v9H6v-9l-1 2-4-2 3-5z"/></svg></div><div class="cart-copy"><b>${lastOrder.fabric} Custom Tee</b><span>${lastOrder.color} · Ready to ship</span></div><span class="cart-price">$${lastOrder.price}</span></div>`}
+      function openCart(){renderCart();cartModal.classList.add('open')}
+      function closeCart(){cartModal.classList.remove('open')}
+      cartButton.addEventListener('click',openCart);document.getElementById('closeCart').addEventListener('click',closeCart);cartModal.addEventListener('click',e=>{if(e.target===cartModal)closeCart()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCart()});
+      document.getElementById('themeToggle').addEventListener('click',()=>{const dark=body.classList.toggle('dark');document.querySelector('meta[name="theme-color"]').content=dark?'#0c0c0d':'#eeeae4';document.getElementById('themeToggle').setAttribute('aria-label',dark?'Switch to light mode':'Switch to dark mode');document.getElementById('themeIcon').innerHTML=dark?'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/>':'<path d="M20.4 14.6A8.5 8.5 0 0 1 9.4 3.6 8.5 8.5 0 1 0 20.4 14.6Z"/>'});
+    })();
+  </script>
+</body>
+</html>
